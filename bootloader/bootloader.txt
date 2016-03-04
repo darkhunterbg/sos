@@ -1,0 +1,1 @@
+./Debug/boot2_start.cpp.o ./Debug/boot2_vga.cpp.o ./Debug/boot2_memory.cpp.o   
