@@ -22,14 +22,14 @@ void boot2()
     MemoryService memoryService;
     DiskService diskService;
     VgaService vgaService;
-	diskService.vga = &vgaService;
+    diskService.vga = &vgaService;
 
     vgaService.ClearScreen(0x00);
 
-    vgaService.SetCursorColor(0x07);
-    vgaService.SetCursorPos(16, 3);
+    //  vgaService.SetCursorColor(0x07);
+    //  vgaService.SetCursorPos(16, 3);
 
-   /* vgaService.Print("+-----------------------------------------+");
+    /* vgaService.Print("+-----------------------------------------+");
     vgaService.SetCursorPos(16, 4);
     vgaService.Print("|    SOS 32 Bit C++ Kernel Executing!     |");
     vgaService.SetCursorPos(16, 5);
@@ -41,33 +41,74 @@ void boot2()
 
 	vgaService.SetCursorPos(0, 12);*/
 
-    vgaService.SetCursorPos(0, 15);
-    if(diskService.DetectPrimaryDisk())
-	ShowSuccess("Primary hard drive detected!\n", vgaService);
-    else
+    vgaService.SetCursorPos(0, 0);
+    if(!diskService.DetectPrimaryDisk())
 	{
-	    ShowFailed("Primary hard drive not found!", vgaService);
-		asm("hlt"); 
+	    ShowFailed("Primary hard drive not found!\n", vgaService);
+	    asm("hlt");
 	}
-	diskService.DisableInterrups();
-	
-	uint startSector = diskService.GetBootRecord().reservedSectorsCount + 
-	diskService.GetExtendedBootRecord().sectorsPerFAT * diskService.GetBootRecord().fatCount;
 
-	vgaService.Print("Start sector: "); vgaService.Print((startSector));
+    diskService.DisableInterrups();
 
-	byte* buffer = static_cast<byte*>(memoryService.Allocate(sizeof(byte)* DiskService::SECTOR_SIZE_BYTES));
+    long root = diskService.GetRootSector();
+    FAT32Object objects[16];
 
-	diskService.ReadFromHDD(8216,1 ,buffer);
-	
-	vgaService.Print("\nRead complete!");
-	
-	//buffer[11] = '\0';
-	
-	vgaService.SetCursorPos(0, 12);
-	vgaService.Print(reinterpret_cast<char*>(buffer));
-	
-    byte a = 0x00;
+    for(int j = 0; j < 1; ++j)
+	{
+	    diskService.ReadObjectsFromSector(root + j, objects);
+	    for(int i = 15; i >= 0; --i)
+		{
+		    FAT32Object& obj = objects[i];
+
+		    if(obj.attributes == FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
+			{
+
+			    vgaService.SetCursorColor(0x17);
+			    FAT32LongFileEntry& entry = reinterpret_cast<FAT32LongFileEntry&>(obj);
+
+			    vgaService.PrintUTF16(entry.firstChar, 10);
+			    vgaService.PrintUTF16(entry.secondChar, 12);
+			    vgaService.PrintUTF16(entry.thirdChar, 4);
+			}
+		    else
+			{
+			    if((byte)obj.attributes == 0)
+				continue;
+			    if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY)
+				vgaService.SetCursorColor(0x13);
+			    else  if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
+						vgaService.SetCursorColor(0x14);
+					else
+				vgaService.SetCursorColor(0x17);
+			    vgaService.Print('\n');
+			    vgaService.Print(obj.name, 11);
+			    vgaService.Print(' ');
+			    vgaService.Print((uint)obj.attributes);
+				vgaService.Print(' ');
+			}
+		}
+
+	    /*vgaService.Print(objects[i].name);
+	    vgaService.Print(' ');
+	    vgaService.Print(static_cast<uint>(objects[i].attributes));
+	    vgaService.Print(' ');
+	    vgaService.Print(objects[i].size);
+	    vgaService.Print('\n');*/
+	}
+    //vgaService.Print(static_cast<uint>(diskService.GetBootRecord().reservedSectorsCount));
+
+    //byte* buffer = static_cast<byte*>(memoryService.Allocate(sizeof(byte)* DiskService::SECTOR_SIZE_BYTES));
+
+    //diskService.ReadFromHDD(8216,1 ,buffer);
+
+    //vgaService.Print("\nRead complete!");
+
+    //buffer[11] = '\0';
+
+    //vgaService.SetCursorPos(0, 12);
+    //vgaService.Print(reinterpret_cast<char*>(buffer));
+
+    /* byte a = 0x00;
     byte b = 0x10;
     while(true)
 	{
@@ -85,7 +126,7 @@ void boot2()
 		    vgaService.Print(' ');
 		    ++x;
 		}
-	}
+	}*/
 
     asm("hlt");
 }
@@ -103,7 +144,7 @@ void ShowFailed(const char* msg, VgaService& vgaService)
     vgaService.Print(msg);
 }
 
-void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
+/*void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
 {
     const FAT32BootRecord& bootRecord = diskService.GetBootRecord();
     const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
@@ -116,4 +157,4 @@ void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
     vgaService.Print(extendedRecord.volumeLabel, 11);
     vgaService.Print(" Identifier: ");
     vgaService.Print(extendedRecord.identifier, 8);
-}
+}*/

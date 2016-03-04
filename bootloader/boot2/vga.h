@@ -32,6 +32,7 @@ class VgaService
 	void ClearLine(uint line, byte color);
     void SetCursorPos(uint x, uint y);
     void Print(const char* text, uint size = 0);
+	void PrintUTF16(const char* text, uint size = 0);
     void Print(char c);
     void Print(uint n);
     void SetCursorColor(byte color);

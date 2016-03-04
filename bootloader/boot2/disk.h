@@ -36,6 +36,45 @@ struct FAT32BootRecord
 
     //FAT32ExtendedBootRecord extended;
 }; // 40 bytes, but it shoud be 32
+
+enum class FAT32ObjectAttribte : byte
+{
+	FAT32OA_READ_ONLY = 0x01,
+	FAT32OA_HIDDEN = 0x02,
+	FAT32OA_SYSTEM = 0x04,
+	FAT32OA_VOLUME_ID = 0x08,
+	FAT32OA_DIRECTORY = 0x10,
+	FAT32OA_ARCHIVE = 0x20,
+	FAT32OA_LONG_FILE_ENTRY = 0x01 | 0x02 | 0x04 | 0x08
+};
+
+struct FAT32Object
+{
+	char name[11];
+	FAT32ObjectAttribte attributes;
+	byte _winNTReserved;
+	byte creationTimeHMS;
+	ushort creationTime;
+	ushort creationDate;
+	ushort accessDate;
+	ushort firstClusterH;
+	ushort modificationTime;
+	ushort modificationDate;
+	ushort firstCluserL;
+	uint size;
+};
+struct FAT32LongFileEntry
+{
+	byte order;
+	char firstChar[10];
+	FAT32ObjectAttribte attributes;
+	byte type;
+	byte checksum;
+	char secondChar[12];
+	ushort _zero;
+	char thirdChar[4];
+};
+
 enum class ATAIOPort : ushort
 {
     ATAIOP_DATA = 0x01F0,
@@ -83,6 +122,7 @@ struct AtaIdentity
     ulong lba48Sectors; //100-103: taken as a uint64_t contain the total number of 48 bit addressable sectors on the drive. (Probably also proof that LBA48 is supported.)
 };
 
+
 class DiskService
 {
     DiskService(const DiskService&) = delete;
@@ -113,4 +153,6 @@ class DiskService
 
 	void DisableInterrups();
     bool DetectPrimaryDisk();
+	ulong GetRootSector() const;
+	uint ReadObjectsFromSector(ulong sector, FAT32Object* buffer);
 };

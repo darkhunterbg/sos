@@ -65,11 +65,11 @@ bool DiskService::Poll()
 	{
 	    byte status = inb((ushort)ATAIOPort::ATAIOP_COMMAND_STATUS);
 
-		//if(status = 0xFF)
-		{
-			//Something aint right
-			//return false;
-		}
+	    //if(status = 0xFF)
+	    {
+		//Something aint right
+		//return false;
+	    }
 	    //vga->SetCursorPos(0,0);
 	    //vga->Print(static_cast<uint>(status));
 
@@ -165,11 +165,23 @@ bool DiskService::ReadFromHDD(ulong startSector, ushort lengthSectors, byte* out
 		    outBuffer += 2;
 		}
 	}
-    //if(primaryDiskInfo.lba48Supported)
+
+    return true;
 }
 
 void DiskService::DisableInterrups()
 {
     outb((ushort)ATAIOPort::ATAIOP_CONTROL_ALT_STATUS, (byte)ATAIOCommand::ATAIOC_C_NO_INTERRUPTS);
     Poll();
+}
+
+
+uint DiskService::ReadObjectsFromSector(ulong sector, FAT32Object* buffer)
+{
+	 this->ReadFromHDD(sector, 1, reinterpret_cast<byte*>(buffer));
+	 return 512/ 32;
+}
+ulong DiskService::GetRootSector() const
+{
+	return  bootRecord.reservedSectorsCount + extendedRecord.sectorsPerFAT * bootRecord.fatCount;
 }
