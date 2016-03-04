@@ -32,6 +32,8 @@
     <File Name="boot2/disk.h"/>
     <File Name="boot2/disk.cpp"/>
     <File Name="boot2/utils.h"/>
+    <File Name="boot2/io.asm"/>
+    <File Name="boot2/io.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -61,10 +63,9 @@ BootLoaderSize=422]]>
       </Debugger>
       <PreBuild>
         <Command Enabled="yes">$(NASMDir)/nasm -f bin boot1.asm -o ../Build/Debug/boot1.bin</Command>
-        <Command Enabled="no">#$(NASMDir)/nasm -f elf ./boot2/vga/vga.asm -o ./Debug/boot2_vga_vga.asm.o</Command>
+        <Command Enabled="yes">$(NASMDir)/nasm -f elf ./boot2/io.asm -o ./Debug/boot2_io.asm.o</Command>
       </PreBuild>
       <PostBuild>
-        <Command Enabled="no">#C:\MinGW\bin\ld.exe -T linker.lds</Command>
         <Command Enabled="yes">objcopy -O binary -j .text -j .rdata ./Debug/boot2.exe ../Build/Debug/boot2.bin</Command>
         <Command Enabled="yes"/>
         <Command Enabled="yes">..\Tools\verify-build ../Build/Debug/</Command>

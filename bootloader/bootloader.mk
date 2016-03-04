@@ -109,6 +109,7 @@ $(IntermediateDirectory)/.d:
 PreBuild:
 	@echo Executing Pre Build commands ...
 	'C:\NASM'/nasm -f bin boot1.asm -o ../Build/Debug/boot1.bin
+	'C:\NASM'/nasm -f elf ./boot2/io.asm -o ./Debug/boot2_io.asm.o
 	@echo Done
 
 
