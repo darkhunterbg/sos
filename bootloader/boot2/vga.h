@@ -18,9 +18,11 @@ class VgaService
     byte* videoMemory = reinterpret_cast<byte*>(VgaService::VIDEO_MEMORY);
 
     const uint VIDEO_MEMORY = 0xB8000;
-    const uint COLUMNS = 80;
-    const uint LINES = 25;
-    const uint PAGES = 8;
+
+  public:
+    static const uint COLUMNS = 80;
+    static const uint LINES = 25;
+    static const uint PAGES = 8;
 
   public:
     VgaService();
@@ -30,6 +32,6 @@ class VgaService
     void SetCursorPos(uint x, uint y);
     void Print(const char* text, uint size = 0);
     void Print(char c);
-	void Print(uint n);
+    void Print(uint n);
     void SetCursorColor(byte color);
 };

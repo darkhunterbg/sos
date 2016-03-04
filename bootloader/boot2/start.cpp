@@ -15,6 +15,8 @@ int start()
 #include "io.h"
 
 void PrintDiskInfo(DiskService&, VgaService&);
+void ShowSuccess(const char* msg, VgaService& vgaService);
+void ShowFailed(const char* msg, VgaService& vgaService);
 
 inline void* operator new(uint, void* p) throw()
 {
@@ -52,6 +54,7 @@ void boot2()
     vgaService.SetCursorColor(0x0F);
     vgaService.Print("I am preparing to load... Hold on, please... :)");
 
+    /*
     const FAT32BootRecord& bootRecord = diskService.GetBootRecord();
     const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
 
@@ -63,36 +66,48 @@ void boot2()
     vgaService.Print(extendedRecord.volumeLabel, 11);
     vgaService.Print(" Identifier: ");
     vgaService.Print(extendedRecord.identifier, 8);
+	*/
 
 
-	outb(0x1F6,0xA0);
-	outb(0x1F2,0x0);
-	outb(0x1F3,0x0);
-	outb(0x1F4,0x0);
-	outb(0x1F5,0x0);
-	outb(0x1F7,0xEC);
-	byte status = inb(0x1F7);
-	vgaService.Print(static_cast<uint>(status & 0x08)); 
-   // PrintDiskInfo(diskService, vgaService);
+    if(diskService.DetectPrimaryDisk())
+	ShowSuccess("Primary hard drive detected!", vgaService);
+    else
+	ShowFailed("Primary hard drive not found!", vgaService);
 
     vgaService.SetCursorColor(0x07);
     uint x = 0;
-    for(uint i = 0; i < 320; ++i)
+
+    for(uint i = 0; i < VgaService::COLUMNS; ++i)
 	{
-	    for(uint j = 0; j < 100000; ++j)
+	    for(uint j = 0; j < 200000; ++j)
 		{
-		    vgaService.SetCursorPos(x, 20);
+		    vgaService.SetCursorPos(x, 22);
 		}
 	    vgaService.Print('=');
 	    ++x;
 	}
 
-   asm("hlt");
+    asm("hlt");
+}
+
+void ShowSuccess(const char* msg, VgaService& vgaService)
+{
+	return;
+    vgaService.SetCursorPos(0, 20);
+    vgaService.SetCursorColor(0x07);
+    vgaService.Print(msg);
+}
+void ShowFailed(const char* msg, VgaService& vgaService)
+{
+	return;
+    vgaService.SetCursorPos(0, 20);
+    vgaService.SetCursorColor(0x07);
+    vgaService.Print(msg);
 }
 
 void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
 {
-   // const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
+    // const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
 
     vgaService.SetCursorPos(0, 10);
     vgaService.SetCursorColor(0x0B);
