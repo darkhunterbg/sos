@@ -53,77 +53,123 @@ void DiskService::ReadBootRecord()
     utils::Copy(ptr + 82, extendedRecord.identifier, 8);
     extendedRecord.identifier[8] = '\0';
     // extendedRecord = reinterpret_cast<FAT32ExtendedBootRecord*>(BOOT_RECORD_ADDRESS + 36) ;
+    //
+    //	vgaService.Print(diskService.GetBootRecord().reservedSectorsCount +
+    //diskService.GetExtendedBootRecord().sectorsPerFAT * diskService.GetBootRecord().fatCount);
+    //
+}
+
+bool DiskService::Poll()
+{
+    while(true)
+	{
+	    byte status = inb((ushort)ATAIOPort::ATAIOP_COMMAND_STATUS);
+
+		//if(status = 0xFF)
+		{
+			//Something aint right
+			//return false;
+		}
+	    //vga->SetCursorPos(0,0);
+	    //vga->Print(static_cast<uint>(status));
+
+	    if(status & (byte)ATAStatus::ATAS_BUSY)
+		continue;
+
+	    if(status & (byte)ATAStatus::ATAS_ERROR || status & (byte)ATAStatus::ATAS_DRIVE_FAULT)
+		return false;
+
+	    if(status & (byte)ATAStatus::ATAS_READY)
+		return true;
+	};
 }
 
 bool DiskService::DetectPrimaryDisk()
 {
     primaryDiskInfo.detected = false;
 
-    outb((ushort)ATAIOPort::ATAIOP_DRIVE_SELECT, (byte)ATAIOCommand::ATAIOC_DRIVE_MASTER);
+    outb((ushort)ATAIOPort::ATAIOP_DRIVE_SELECT, (byte)ATAIOCommand::ATAIOC_DRIVE_SELECT);
     outb((ushort)ATAIOPort::ATAIOP_SECTOR_COUNT, 0x00);
     outb((ushort)ATAIOPort::ATAIOP_LBA_LOW, 0x00);
     outb((ushort)ATAIOPort::ATAIOP_LBA_MID, 0x00);
     outb((ushort)ATAIOPort::ATAIOP_LBA_HIGH, 0x00);
     outb((ushort)ATAIOPort::ATAIOP_COMMAND_STATUS, (byte)ATAIOCommand::ATAIOC_IDENTITY);
 
-    byte status = 0;
-    while(true)
-	{
-	    status = inb((ushort)ATAIOPort::ATAIOP_COMMAND_STATUS);
+    if(!Poll())
+	return false;
 
-	    if(status == 0)
-		{
-		    //Does not exist
-		    return false;
-		}
-
-	    if(status & 0x80)
-		{
-		    //Still busy
-		    continue;
-		}
-
-	    if(inb((ushort)ATAIOPort::ATAIOP_LBA_MID) || inb((ushort)ATAIOPort::ATAIOP_LBA_HIGH))
-		{
-		    //Not an ATA
-		    return false;
-		}
-
-	    if(status & 0x00)
-		{
-		    //Error
-		    return false;
-		}
-
-	    if(status & 0x08)
-		{
-		    //Drive detected
-		    primaryDiskInfo.detected = true;
-		    break;
-		}
-	}
+    primaryDiskInfo.detected = true;
 
     ushort data[256];
     for(uint i = 0; i < 256; ++i)
 	data[i] = inw((ushort)ATAIOPort::ATAIOP_DATA);
 
-    primaryDiskInfo._type = data[0];
+    //primaryDiskInfo._type = data[0];
 
-    primaryDiskInfo.lba28Sectors = data[61];
-    primaryDiskInfo.lba28Sectors  = primaryDiskInfo.lba28Sectors << sizeof(ushort);
-    primaryDiskInfo.lba28Sectors += data[60];
+    // primaryDiskInfo.lba28Sectors = data[61];
+    // primaryDiskInfo.lba28Sectors = primaryDiskInfo.lba28Sectors << sizeof(ushort);
+    // primaryDiskInfo.lba28Sectors += data[60];
 
     primaryDiskInfo.lba48Sectors = data[103];
     for(int i = 3; i >= 0; --i)
 	{
-	    primaryDiskInfo.lba48Sectors  = primaryDiskInfo.lba48Sectors << sizeof(ushort);
+	    primaryDiskInfo.lba48Sectors = primaryDiskInfo.lba48Sectors << sizeof(ushort);
 	    primaryDiskInfo.lba48Sectors += data[100 + i];
 	}
 
     primaryDiskInfo.lba48Supported = data[83] & (1 << 10);
-    primaryDiskInfo.udmaSupported = data[88] & 0x00FF;
-    primaryDiskInfo.currentUdma = data[88] & 0xFF00;
-    primaryDiskInfo.pin80Cable = data[93] & (1 << 12);
+    //primaryDiskInfo.udmaSupported = data[88] & 0x00FF;
+    // primaryDiskInfo.currentUdma = data[88] & 0xFF00;
+    // primaryDiskInfo.pin80Cable = data[93] & (1 << 12);
 
     return true;
+}
+
+bool DiskService::ReadFromHDD(ulong startSector, ushort lengthSectors, byte* outBuffer)
+{
+
+    outb((ushort)ATAIOPort::ATAIOP_DRIVE_SELECT, (byte)ATAIOCommand::ATAIOC_DRIVE_RW);
+
+    byte sectorsHigh = lengthSectors >> 8 & 0xFF;
+    byte sectorsLow = lengthSectors & 0xFF;
+
+    byte lba[6];
+
+    for(uint i = 0; i < 6; ++i)
+	{
+	    lba[i] = startSector & 0xFF;
+	    startSector = startSector >> 8;
+	}
+
+    outb((ushort)ATAIOPort::ATAIOP_SECTOR_COUNT, sectorsHigh);
+    outb((ushort)ATAIOPort::ATAIOP_LBA_LOW, lba[3]);
+    outb((ushort)ATAIOPort::ATAIOP_LBA_MID, lba[4]);
+    outb((ushort)ATAIOPort::ATAIOP_LBA_HIGH, lba[5]);
+    outb((ushort)ATAIOPort::ATAIOP_SECTOR_COUNT, sectorsLow);
+    outb((ushort)ATAIOPort::ATAIOP_LBA_LOW, lba[0]);
+    outb((ushort)ATAIOPort::ATAIOP_LBA_MID, lba[1]);
+    outb((ushort)ATAIOPort::ATAIOP_LBA_HIGH, lba[2]);
+
+    outb((ushort)ATAIOPort::ATAIOP_COMMAND_STATUS, (byte)ATAIOCommand::ATAIOC_READ_LBA48);
+
+    for(ushort s = 0; s < lengthSectors; ++s)
+	{
+	    if(!Poll())
+		return false;
+
+	    for(uint i = 0; i < 256; ++i)
+		{
+		    ushort data = inw((ushort)ATAIOPort::ATAIOP_DATA);
+		    outBuffer[0] = data & 0xFF;
+		    outBuffer[1] = data >> 8 & 0xFF;
+		    outBuffer += 2;
+		}
+	}
+    //if(primaryDiskInfo.lba48Supported)
+}
+
+void DiskService::DisableInterrups()
+{
+    outb((ushort)ATAIOPort::ATAIOP_CONTROL_ALT_STATUS, (byte)ATAIOCommand::ATAIOC_C_NO_INTERRUPTS);
+    Poll();
 }

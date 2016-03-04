@@ -22,6 +22,3 @@ public:
 	void* Allocate(uint size);
 	void Deallocate(void* ptr);
 };
-
-extern MemoryService* _msInstance ;
-

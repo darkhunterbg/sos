@@ -1,7 +1,5 @@
 #include "memory.h"
 
-MemoryService* _msInstance = nullptr;
-
 MemoryService::MemoryService()
 {
     memoryPtr = reinterpret_cast<byte*>(MEMORY_START);

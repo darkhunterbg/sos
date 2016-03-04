@@ -22,13 +22,14 @@ void boot2()
     MemoryService memoryService;
     DiskService diskService;
     VgaService vgaService;
+	diskService.vga = &vgaService;
 
     vgaService.ClearScreen(0x00);
 
     vgaService.SetCursorColor(0x07);
     vgaService.SetCursorPos(16, 3);
 
-    vgaService.Print("+-----------------------------------------+");
+   /* vgaService.Print("+-----------------------------------------+");
     vgaService.SetCursorPos(16, 4);
     vgaService.Print("|    SOS 32 Bit C++ Kernel Executing!     |");
     vgaService.SetCursorPos(16, 5);
@@ -38,6 +39,8 @@ void boot2()
     vgaService.SetCursorColor(0x0F);
     vgaService.Print("I am preparing to load... Hold on, please... :)");
 
+	vgaService.SetCursorPos(0, 12);*/
+
     vgaService.SetCursorPos(0, 15);
     if(diskService.DetectPrimaryDisk())
 	ShowSuccess("Primary hard drive detected!\n", vgaService);
@@ -46,6 +49,24 @@ void boot2()
 	    ShowFailed("Primary hard drive not found!", vgaService);
 		asm("hlt"); 
 	}
+	diskService.DisableInterrups();
+	
+	uint startSector = diskService.GetBootRecord().reservedSectorsCount + 
+	diskService.GetExtendedBootRecord().sectorsPerFAT * diskService.GetBootRecord().fatCount;
+
+	vgaService.Print("Start sector: "); vgaService.Print((startSector));
+
+	byte* buffer = static_cast<byte*>(memoryService.Allocate(sizeof(byte)* DiskService::SECTOR_SIZE_BYTES));
+
+	diskService.ReadFromHDD(8216,1 ,buffer);
+	
+	vgaService.Print("\nRead complete!");
+	
+	//buffer[11] = '\0';
+	
+	vgaService.SetCursorPos(0, 12);
+	vgaService.Print(reinterpret_cast<char*>(buffer));
+	
     byte a = 0x00;
     byte b = 0x10;
     while(true)
