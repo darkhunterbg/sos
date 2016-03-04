@@ -11,6 +11,9 @@ int start()
 
 #include "memory.h"
 #include "vga.h"
+#include "disk.h"
+
+void PrintDiskInfo(DiskService&, VgaService&);
 
 inline void* operator new(uint, void* p) throw()
 {
@@ -30,24 +33,39 @@ inline void operator delete[](void*, void*) throw()
 void boot2()
 {
     MemoryService memoryService;
-
+    DiskService diskService;
     VgaService vgaService;
 
     vgaService.ClearScreen(0x00);
+
     vgaService.SetCursorColor(0x07);
-    vgaService.SetCursorPos(16, 6);
+    vgaService.SetCursorPos(16, 3);
 
     vgaService.Print("+-----------------------------------------+");
-    vgaService.SetCursorPos(16, 7);
+    vgaService.SetCursorPos(16, 4);
     vgaService.Print("|    SOS 32 Bit C++ Kernel Executing!     |");
-    vgaService.SetCursorPos(16, 8);
+    vgaService.SetCursorPos(16, 5);
     vgaService.Print("+-----------------------------------------+");
 
     vgaService.SetCursorPos(16, 16);
     vgaService.SetCursorColor(0x0F);
     vgaService.Print("I am preparing to load... Hold on, please... :)");
-    vgaService.SetCursorPos(0, 20);
 
+    const FAT32BootRecord& bootRecord = diskService.GetBootRecord();
+    const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
+
+    vgaService.SetCursorPos(0, 10);
+    vgaService.SetCursorColor(0x0B);
+    vgaService.Print("OEM: ");
+    vgaService.Print(bootRecord.oem);
+    vgaService.Print(" Label: ");
+    vgaService.Print(extendedRecord.volumeLabel, 11);
+    vgaService.Print(" Identifier: ");
+    vgaService.Print(extendedRecord.identifier, 8);
+
+    //PrintDiskInfo(diskService, vgaService);
+
+    vgaService.SetCursorColor(0x07);
     uint x = 0;
     for(uint i = 0; i < 320; ++i)
 	{
@@ -55,9 +73,18 @@ void boot2()
 		{
 		    vgaService.SetCursorPos(x, 20);
 		}
-	    vgaService.PrintChar('=');
+	    vgaService.Print('=');
 	    ++x;
 	}
 
     asm("hlt");
+}
+
+void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
+{
+    //const FAT32BootRecord& bootRecord = diskService.GetBootRecord();
+
+    // vgaService.SetCursorPos(0, 10);
+    vgaService.SetCursorColor(0x0B);
+    //  vgaService.Print(bootRecord.oem);
 }

@@ -5,8 +5,8 @@
 ## Debug
 ProjectName            :=bootloader
 ConfigurationName      :=Debug
-WorkspacePath          := "E:\Desktop\SOS"
-ProjectPath            := "E:\Desktop\SOS\bootloader"
+WorkspacePath          := "D:\SOS\sos"
+ProjectPath            := "D:\SOS\sos\bootloader"
 IntermediateDirectory  :=./Debug
 OutDir                 := $(IntermediateDirectory)
 CurrentFileName        :=
@@ -69,7 +69,7 @@ OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
 BootLoaderOffset:=90
 BootLoaderSize:=422
-Objects0=$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix) 
 
 
 
@@ -116,7 +116,7 @@ PreBuild:
 ## Objects
 ##
 $(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix): boot2/start.cpp $(IntermediateDirectory)/boot2_start.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "E:/Desktop/SOS/bootloader/boot2/start.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/start.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/boot2_start.cpp$(DependSuffix): boot2/start.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/boot2_start.cpp$(DependSuffix) -MM "boot2/start.cpp"
 
@@ -124,7 +124,7 @@ $(IntermediateDirectory)/boot2_start.cpp$(PreprocessSuffix): boot2/start.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_start.cpp$(PreprocessSuffix) "boot2/start.cpp"
 
 $(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix): boot2/vga.cpp $(IntermediateDirectory)/boot2_vga.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "E:/Desktop/SOS/bootloader/boot2/vga.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/vga.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/boot2_vga.cpp$(DependSuffix): boot2/vga.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/boot2_vga.cpp$(DependSuffix) -MM "boot2/vga.cpp"
 
@@ -132,12 +132,20 @@ $(IntermediateDirectory)/boot2_vga.cpp$(PreprocessSuffix): boot2/vga.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_vga.cpp$(PreprocessSuffix) "boot2/vga.cpp"
 
 $(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix): boot2/memory.cpp $(IntermediateDirectory)/boot2_memory.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "E:/Desktop/SOS/bootloader/boot2/memory.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) $(IncludePath)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/memory.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/boot2_memory.cpp$(DependSuffix): boot2/memory.cpp
 	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/boot2_memory.cpp$(DependSuffix) -MM "boot2/memory.cpp"
 
 $(IntermediateDirectory)/boot2_memory.cpp$(PreprocessSuffix): boot2/memory.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_memory.cpp$(PreprocessSuffix) "boot2/memory.cpp"
+
+$(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix): boot2/disk.cpp $(IntermediateDirectory)/boot2_disk.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/disk.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/boot2_disk.cpp$(DependSuffix): boot2/disk.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/boot2_disk.cpp$(DependSuffix) -MM "boot2/disk.cpp"
+
+$(IntermediateDirectory)/boot2_disk.cpp$(PreprocessSuffix): boot2/disk.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_disk.cpp$(PreprocessSuffix) "boot2/disk.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

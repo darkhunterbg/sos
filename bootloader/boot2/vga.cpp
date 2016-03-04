@@ -2,7 +2,7 @@
 
 VgaService::VgaService()
 {
-     videoMemory = reinterpret_cast<byte*>(VgaService::VIDEO_MEMORY);
+    videoMemory = reinterpret_cast<byte*>(VgaService::VIDEO_MEMORY);
 }
 VgaService::~VgaService()
 {
@@ -23,17 +23,27 @@ void VgaService::SetCursorPos(uint x, uint y)
     cursor.x = x;
     cursor.y = y;
 }
-void VgaService::Print(const char* text)
+void VgaService::Print(const char* text, uint size)
 {
-
     const char* ptr = text;
-    while(*ptr != '\0')
+    if(size)
 	{
-	    PrintChar(*ptr);
-	    ++ptr;
+	    for(uint i = 0; i < size; ++i)
+		{
+		    Print(*ptr);
+		    ++ptr;
+		}
+	}
+    else
+	{
+	    while(*ptr != '\0')
+		{
+		    Print(*ptr);
+		    ++ptr;
+		}
 	}
 }
-void VgaService::PrintChar(char c)
+void VgaService::Print(char c)
 {
     if(c == 0)
 	return;
@@ -58,6 +68,30 @@ void VgaService::PrintChar(char c)
 	    cursor.x = 0;
 	}
 }
+void VgaService::Print(uint n)
+{
+    uint tmp = n;
+    uint length = 0;
+    do
+	{
+	    ++length;
+	    tmp /= 10;
+	}
+    while(tmp > 0);
+
+    char buffer[32];
+
+    for(int i = length - 1; i >= 0; --i)
+	{
+	    buffer[i] = n % 10 + '0';
+	    n /= 10;
+	}
+
+	buffer[length] = '\0';
+
+    Print(buffer);
+}
+
 void VgaService::SetCursorColor(byte color)
 {
     cursor.color = color;

@@ -151,7 +151,7 @@ ProtectedMode:
 	mov fs, ax
 	mov gs, ax
 	
-	mov esp, 0xFFFF					; stack pointer from
+	mov esp, 0xFFFFFF					; stack pointer from
 	
 
 	;cld

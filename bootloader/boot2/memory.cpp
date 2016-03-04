@@ -22,8 +22,9 @@ void* MemoryService::Allocate(uint size)
 
     return static_cast<void*>(result);
 }
-MemoryService::Deallocate(void* ptr)
+void MemoryService::Deallocate(void* )
 {
+	
     //Nothing we can do :(
 }
 void MemoryService::Copy(void* source, void* dest, uint size) const
