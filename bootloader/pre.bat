@@ -1,0 +1,1 @@
+if not exist "Debug" mkdir Debug

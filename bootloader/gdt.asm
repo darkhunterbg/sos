@@ -45,12 +45,15 @@ GDD equ gdt_data - gdt_start
 InstallGDT:
 	cli
 	
-	;xor edx, edx
-	;mov dx, ds
-	;shl edx, 4
-	;add [toc+2], edx
-	
 	lgdt [toc]
+	
+	sti
+	ret
+	
+InstallIDT:
+	cli
+	
+	lidt [idt]
 	
 	sti
 	ret
@@ -79,10 +82,32 @@ gdt_data:
 	db 11001111b				; granualarity
 	db 0						; base high
 
+
 end_of_gdt:
 toc:
 	dw end_of_gdt - gdt_start - 1; limit(Size of GDT)
 	dd gdt_start				; base of GDT
 
+isr:
+	dw 0
 
+idt_start:
+idt_interrupt_gate:
+	dw isr						; interrupt service routine low
+	dw GCD						; segment (must be the same as isr)
+	db 0						; zero
+	db 00001110b				; access
+	dw 0						; interrupt service routine high
+
+idt_task_gate:
+	dw 0						; interrupt service routine low
+	dw GCD						; segment (must be the same as isr)
+	db 0						; zero
+	db 10010101b				; access
+	dw 0						; interrupt service routine high
+idt_end:
+idt:
+	dw 2048
+	;dw idt_end - idt_start - 1; limit(Size of IDT)
+	dd idt_start				; base of IDT
 %endif

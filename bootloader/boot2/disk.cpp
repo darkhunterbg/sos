@@ -110,13 +110,13 @@ bool DiskService::DetectPrimaryDisk()
     primaryDiskInfo._type = data[0];
 
     primaryDiskInfo.lba28Sectors = data[61];
-    primaryDiskInfo.lba28Sectors << sizeof(ushort);
+    primaryDiskInfo.lba28Sectors  = primaryDiskInfo.lba28Sectors << sizeof(ushort);
     primaryDiskInfo.lba28Sectors += data[60];
 
     primaryDiskInfo.lba48Sectors = data[103];
     for(int i = 3; i >= 0; --i)
 	{
-	    primaryDiskInfo.lba48Sectors << sizeof(ushort);
+	    primaryDiskInfo.lba48Sectors  = primaryDiskInfo.lba48Sectors << sizeof(ushort);
 	    primaryDiskInfo.lba48Sectors += data[100 + i];
 	}
 

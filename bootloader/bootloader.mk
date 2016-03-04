@@ -52,7 +52,7 @@ LibPath                := $(LibraryPathSwitch).
 AR       := C:/MinGW/bin/ar.exe rcu
 CXX      := C:/MinGW/bin/g++.exe
 CC       := C:/MinGW/bin/gcc.exe
-CXXFLAGS :=  -pedantic-errors -g -Os -ansi -pedantic -W -std=c++14 -Wall -nostdlib -fno-rtti -fno-exceptions $(Preprocessors)
+CXXFLAGS :=  -pedantic-errors -ansi -pedantic -W -std=c++14 -Wall -nostdlib -fno-rtti -fno-exceptions -mno-sse -mno-sse2 $(Preprocessors)
 CFLAGS   :=  -g -O0 -Wall $(Preprocessors)
 ASFLAGS  := 
 AS       := C:/MinGW/bin/as.exe
@@ -108,6 +108,7 @@ $(IntermediateDirectory)/.d:
 
 PreBuild:
 	@echo Executing Pre Build commands ...
+	pre.bat
 	'C:\NASM'/nasm -f bin boot1.asm -o ../Build/Debug/boot1.bin
 	'C:\NASM'/nasm -f elf ./boot2/io.asm -o ./Debug/boot2_io.asm.o
 	@echo Done

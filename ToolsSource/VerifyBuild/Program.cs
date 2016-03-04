@@ -12,6 +12,7 @@ namespace VerifyBuild
         const int Boot1ValidSize = 422;
         const int Boot2MaxSize = 4 * 1024 * 2;
         static readonly byte[] BootSectorSignature = { 0x55, 0xAA };
+        static readonly byte[] Boot2EntrySignature = { 0x55, 0x89 ,0xE5 };
 
         static string BuildPath { get; set; }
         static string Boot1Path { get; set; }
@@ -53,6 +54,17 @@ namespace VerifyBuild
             {
                 Console.WriteLine("error: boot2.bin is exceeds {0} bytes ({1} bytes)!", Boot2MaxSize, size);
                 return 2;
+            }
+
+
+            bytes = File.ReadAllBytes(Boot2Path);
+            for (int i = 0; i < Boot2EntrySignature.Length; ++i)
+            {
+                if (Boot2EntrySignature[i] != bytes[i])
+                {
+                    Console.WriteLine("error: boot2.bin has invalid entry point!");
+                    return 3;
+                }
             }
 
             Console.WriteLine("Validation complete!");

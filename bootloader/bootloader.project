@@ -34,6 +34,7 @@
     <File Name="boot2/utils.h"/>
     <File Name="boot2/io.asm"/>
     <File Name="boot2/io.h"/>
+    <File Name="boot2/idt.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -46,7 +47,7 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="MinGW ( MinGW )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-pedantic-errors;-g;-Os;-ansi;-pedantic;-W;-std=c++14;-Wall;-nostdlib;-fno-rtti;-fno-exceptions" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-pedantic-errors;-ansi;-pedantic;-W;-std=c++14;-Wall;-nostdlib;-fno-rtti;-fno-exceptions;-mno-sse;-mno-sse2" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-s;@&quot;asmobjects.txt&quot; -Wl,-Ttext=0x10000;-nostdlib" Required="yes"/>
@@ -62,6 +63,7 @@ BootLoaderSize=422]]>
         <StartupCommands/>
       </Debugger>
       <PreBuild>
+        <Command Enabled="yes">pre.bat</Command>
         <Command Enabled="yes">$(NASMDir)/nasm -f bin boot1.asm -o ../Build/Debug/boot1.bin</Command>
         <Command Enabled="yes">$(NASMDir)/nasm -f elf ./boot2/io.asm -o ./Debug/boot2_io.asm.o</Command>
       </PreBuild>
