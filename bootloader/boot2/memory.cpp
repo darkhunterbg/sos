@@ -27,13 +27,3 @@ void MemoryService::Deallocate(void* )
 	
     //Nothing we can do :(
 }
-void MemoryService::Copy(void* source, void* dest, uint size) const
-{
-    byte* s = reinterpret_cast<byte*>(source);
-    byte* d = reinterpret_cast<byte*>(dest);
-
-    for(uint i = 0; i < size; ++i)
-	{
-	    d[i] = s[i];
-	}
-}

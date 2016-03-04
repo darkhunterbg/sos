@@ -63,7 +63,7 @@ void boot2()
     vgaService.Print(" Identifier: ");
     vgaService.Print(extendedRecord.identifier, 8);
 
-    //PrintDiskInfo(diskService, vgaService);
+   // PrintDiskInfo(diskService, vgaService);
 
     vgaService.SetCursorColor(0x07);
     uint x = 0;
@@ -82,9 +82,9 @@ void boot2()
 
 void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
 {
-    //const FAT32BootRecord& bootRecord = diskService.GetBootRecord();
+    const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
 
-    // vgaService.SetCursorPos(0, 10);
+    vgaService.SetCursorPos(0, 10);
     vgaService.SetCursorColor(0x0B);
-    //  vgaService.Print(bootRecord.oem);
+    vgaService.Print("OEM: ");
 }

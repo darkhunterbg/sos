@@ -21,7 +21,6 @@ public:
 	
 	void* Allocate(uint size);
 	void Deallocate(void* ptr);
-	void Copy(void* source, void* dest, uint sourceSize) const;
 };
 
 extern MemoryService* _msInstance ;
