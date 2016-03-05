@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="SOS" Database="">
   <Project Name="bootloader" Path="bootloader/bootloader.project" Active="Yes"/>
+  <Project Name="kernel" Path="kernel/kernel.project"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="bootloader" ConfigName="Debug"/>
+      <Project Name="kernel" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="bootloader" ConfigName="Release"/>
+      <Project Name="kernel" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

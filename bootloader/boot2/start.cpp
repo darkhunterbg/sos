@@ -52,7 +52,7 @@ void boot2()
     else
 	{
 	    diskService.LoadFile(fileCluster, (void*)0x20000);
-	   // vgaService.Print((char*)0x208000);
+	    vgaService.Print((char*)0x2004E);
 	    // vgaService.Print((uint)fileCluster);
 	}
     //vgaService.Print(static_cast<uint>(diskService.GetBootRecord().reservedSectorsCount));
