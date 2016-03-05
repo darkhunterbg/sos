@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=dark_hunter
-Date                   :=05/03/2016
+Date                   :=06/03/2016
 CodeLitePath           :="C:\Program Files\CodeLite"
 LinkerName             :=C:/MinGW/bin/g++.exe
 SharedObjectLinkerName :=C:/MinGW/bin/g++.exe -shared -fPIC
@@ -37,7 +37,7 @@ PCHCompileFlags        :=
 MakeDirCommand         :=makedir
 RcCmpOptions           := 
 RcCompilerName         :=C:/MinGW/bin/windres.exe
-LinkOptions            :=  @"asmobjects.txt" -Wl, -Ttext=0x20000 -nostdlib
+LinkOptions            :=  @"asmobjects.txt" -Wl, -Ttext=0x100000 -nostdlib
 IncludePath            :=  $(IncludeSwitch). $(IncludeSwitch). 
 IncludePCH             := 
 RcIncludePath          := 
@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) 
 
 
 
@@ -87,6 +87,10 @@ $(OutputFile): $(IntermediateDirectory)/.d $(Objects)
 
 PostBuild:
 	@echo Executing Post Build commands ...
+	
+	..\Tools\verify-build ../Build/Debug/ -kernel
+	
+	
 	'C:\Program Files\OSFMount'/OSFMount.com -a -t file -m I: -f 'D:\SOS\vm\disk.img' -o rw
 	xcopy ..\Build\Debug\sos\kernel.sys I:\sos\kernel.sys* /f /y
 	'C:\Program Files\OSFMount'/OSFMount.com -D -m I:
@@ -115,6 +119,14 @@ $(IntermediateDirectory)/kernel.cpp$(DependSuffix): kernel.cpp
 
 $(IntermediateDirectory)/kernel.cpp$(PreprocessSuffix): kernel.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/kernel.cpp$(PreprocessSuffix) "kernel.cpp"
+
+$(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix): memory/MemorySystem.cpp $(IntermediateDirectory)/memory_MemorySystem.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/memory/MemorySystem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/memory_MemorySystem.cpp$(DependSuffix): memory/MemorySystem.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/memory_MemorySystem.cpp$(DependSuffix) -MM "memory/MemorySystem.cpp"
+
+$(IntermediateDirectory)/memory_MemorySystem.cpp$(PreprocessSuffix): memory/MemorySystem.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/memory_MemorySystem.cpp$(PreprocessSuffix) "memory/MemorySystem.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

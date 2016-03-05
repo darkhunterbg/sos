@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="kernel" InternalType="Console">
+  <Reconciliation>
+    <Regexes/>
+    <Excludepaths/>
+    <Ignorefiles/>
+    <Extensions>
+      <![CDATA[cpp;c;h;hpp;xrc;wxcp;fbp]]>
+    </Extensions>
+    <Topleveldir>../kernel</Topleveldir>
+  </Reconciliation>
   <Plugins>
     <Plugin Name="CMakePlugin">
       <![CDATA[[{
@@ -18,6 +27,11 @@
   <Dependencies/>
   <VirtualDirectory Name="kernel">
     <File Name="kernel.cpp"/>
+    <File Name="Types.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="memory">
+    <File Name="memory/MemorySystem.h"/>
+    <File Name="memory/MemorySystem.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -33,7 +47,7 @@
       <Compiler Options="-pedantic-errors;-ansi;-pedantic;-W;-std=c++14;-Wall;-fno-rtti;-fno-exceptions;-mno-sse;-mno-sse2; -nostdlib; -O0;" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
       </Compiler>
-      <Linker Options="@&quot;asmobjects.txt&quot; -Wl, -Ttext=0x20000;-nostdlib" Required="yes"/>
+      <Linker Options="@&quot;asmobjects.txt&quot; -Wl, -Ttext=0x100000;-nostdlib" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../Build/Debug/SOS/kernel.sys" IntermediateDirectory="./Debug" Command="./kernel.sys" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../Build/Debug/SOS/" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="bootloader" DbgSetName="&lt;Use Defaults&gt;">
@@ -48,6 +62,10 @@
         <Command Enabled="yes">pre.bat</Command>
       </PreBuild>
       <PostBuild>
+        <Command Enabled="yes"/>
+        <Command Enabled="yes">..\Tools\verify-build ../Build/Debug/ -kernel</Command>
+        <Command Enabled="yes"/>
+        <Command Enabled="yes"/>
         <Command Enabled="yes">$(OSFMountDir)/OSFMount.com -a -t file -m $(DiskMountPoint) -f $(Disk) -o rw</Command>
         <Command Enabled="yes">xcopy ..\Build\Debug\sos\kernel.sys I:\sos\kernel.sys* /f /y</Command>
         <Command Enabled="yes">$(OSFMountDir)/OSFMount.com -D -m $(DiskMountPoint)</Command>

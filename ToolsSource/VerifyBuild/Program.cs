@@ -10,13 +10,11 @@ namespace VerifyBuild
     class Program
     {
         const int Boot1ValidSize = 422;
-        const int Boot2MaxSize = 4 * 1024 ;
+        const int Boot2MaxSize = 4 * 1024;
         static readonly byte[] BootSectorSignature = { 0x55, 0xAA };
-        static readonly byte[] Boot2EntrySignature = { 0x55, 0x89 ,0xE5 };
+        static readonly byte[] EntrySignature = { 0x55, 0x89, 0xE5 };
 
         static string BuildPath { get; set; }
-        static string Boot1Path { get; set; }
-        static string Boot2Path { get; set; }
 
         static int Main(string[] args)
         {
@@ -27,8 +25,28 @@ namespace VerifyBuild
             }
 
             BuildPath = Path.GetFullPath(args[0]);
-            Boot1Path = Path.Combine(BuildPath, "boot1.bin");
-            Boot2Path = Path.Combine(BuildPath, "boot2.bin");
+
+            int returnCode = 0;
+
+            if (args.Length == 1 || args[1] == "-bootlader")
+                returnCode = ValidateBootloader();
+            else
+            if (args[1] == "-kernel")
+                returnCode = ValidateKernel();
+
+            if (returnCode == 0)
+                Console.WriteLine("Validation complete!");
+            else
+                Console.WriteLine("Validation failed!");
+
+            return returnCode;
+
+        }
+
+        static int ValidateBootloader()
+        {
+            var Boot1Path = Path.Combine(BuildPath, "boot1.bin");
+            var Boot2Path = Path.Combine(BuildPath, "boot2.bin");
 
             Console.WriteLine("Validating build at {0}", BuildPath);
 
@@ -58,9 +76,9 @@ namespace VerifyBuild
 
 
             bytes = File.ReadAllBytes(Boot2Path);
-            for (int i = 0; i < Boot2EntrySignature.Length; ++i)
+            for (int i = 0; i < EntrySignature.Length; ++i)
             {
-                if (Boot2EntrySignature[i] != bytes[i])
+                if (EntrySignature[i] != bytes[i])
                 {
                     Console.WriteLine("error: boot2.bin has invalid entry point!");
                     return 3;
@@ -68,7 +86,13 @@ namespace VerifyBuild
             }
             Console.WriteLine("boot2.size is {0} bytes.", size);
 
-            Console.WriteLine("Validation complete!");
+
+            return 0;
+        }
+
+        static int ValidateKernel()
+        {
+            var kernelPath = Path.Combine(BuildPath, "SOS", "kernel.sys");
 
             return 0;
         }

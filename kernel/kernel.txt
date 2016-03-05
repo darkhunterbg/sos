@@ -1,1 +1,1 @@
-./Debug/kernel.cpp.o   
+./Debug/kernel.cpp.o ./Debug/memory_MemorySystem.cpp.o   

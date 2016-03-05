@@ -19,8 +19,8 @@ int start()
     return 0;
 }
 
-static const uint kernel = 0x20000;
-static const uint kernelFile = 0x200000;
+static const uint kernel =		0x10'00'00;			//1 MB
+static const uint kernelFile =	0x80'00'00;	//8 MB
 
 void boot2()
 {
