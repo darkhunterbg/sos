@@ -66,7 +66,7 @@ namespace VerifyBuild
                     return 3;
                 }
             }
-            Console.WriteLine("boot2.size exceeds {0} bytes.", size);
+            Console.WriteLine("boot2.size is {0} bytes.", size);
 
             Console.WriteLine("Validation complete!");
 

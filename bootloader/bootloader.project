@@ -27,14 +27,13 @@
     <File Name="boot2/types.h" ExcludeProjConfig=""/>
     <File Name="boot2/vga.cpp"/>
     <File Name="boot2/vga.h"/>
-    <File Name="boot2/memory.h"/>
-    <File Name="boot2/memory.cpp"/>
     <File Name="boot2/disk.h"/>
     <File Name="boot2/disk.cpp"/>
     <File Name="boot2/utils.h"/>
     <File Name="boot2/io.asm"/>
     <File Name="boot2/io.h"/>
     <File Name="boot2/idt.h"/>
+    <File Name="boot2/utils.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

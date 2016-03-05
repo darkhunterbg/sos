@@ -137,7 +137,9 @@ class DiskService
     const uint BOOT_RECORD_ADDRESS = 0x0 + 0x7c00;
 
     void ReadBootRecord();
-	bool Poll();
+	long GetObjectCluster(ulong currentDir,const char* name, uint nameLength,const char* ext, bool isDir);
+	static bool Poll();
+	static bool ReadFromHDD(ulong startSector, ushort lengthSectors, byte* outBuffer);
   public:
     static const uint CLUSTER_SIZE_SECTORS = 8;
     static const uint SECTOR_SIZE_BYTES = 512;
@@ -150,11 +152,13 @@ class DiskService
     const FAT32BootRecord& GetBootRecord() const;
     const FAT32ExtendedBootRecord& GetExtendedBootRecord() const;
 
-    bool ReadFromHDD(ulong startSector, ushort lengthSectors, byte* outBuffer);
+
 
 	void DisableInterrups();
     bool DetectPrimaryDisk();
 	ulong GetRootSector() const;
-	uint ReadObjectsFromSector(ulong sector, FAT32Object* buffer);
-	void ReadFatTable(uint* buffer);
+	long GetDirectoryCluster(ulong currentDirCluster,const char* dirName, uint dirNameLength);
+	long GetFileCluster(ulong currentDirCluster,const  char* fileName, uint fileNameLength,const char* extension);
+	bool LoadFile(ulong fileCluster, void* address);
+
 };

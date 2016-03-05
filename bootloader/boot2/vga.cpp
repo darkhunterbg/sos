@@ -18,16 +18,6 @@ void VgaService::ClearScreen(byte color)
 
     SetCursorPos(0, 0);
 }
-void VgaService::ClearLine(uint line, byte color)
-{
-    for(uint i = line * COLUMNS * 2; i < (line + 1) * COLUMNS * 2; i += 2)
-	{
-	    videoMemory[i] = ' ';
-	    videoMemory[i + 1] = color;
-	}
-
-    SetCursorPos(0, line);
-}
 void VgaService::SetCursorPos(uint x, uint y)
 {
     cursor.x = x;
@@ -54,27 +44,7 @@ void VgaService::Print(const char* text, uint size)
 		}
 	}
 }
-void VgaService::PrintUTF16(const char* text, uint size)
-{
-    if(size)
-	{
-	    for(uint i = 0; i < size; i += 2)
-		{
-		    if(*text == '\0')
-			break;
-		    Print(*text);
-		    text += 2;
-		}
-	}
-    else
-	{
-	    while(*text != '\0')
-		{
-		    Print(*text);
-		    text += 2;
-		}
-	}
-}
+
 void VgaService::Print(char c)
 {
     if(c == 0)

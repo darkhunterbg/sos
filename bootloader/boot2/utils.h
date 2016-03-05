@@ -4,14 +4,6 @@
 
 namespace utils
 {
-void Copy(void* source, void* dest, uint size)
-{
-    byte* s = reinterpret_cast<byte*>(source);
-    byte* d = reinterpret_cast<byte*>(dest);
-
-    for(uint i = 0; i < size; ++i)
-	{
-	    d[i] = s[i];
-	}
-}
+void Copy(const void* source, void* dest, uint size);
+bool Compare(const void* a, const void* b, uint count);
 }

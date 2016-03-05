@@ -69,7 +69,7 @@ OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
 BootLoaderOffset:=90
 BootLoaderSize:=422
-Objects0=$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/boot2_start.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_vga.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix) $(IntermediateDirectory)/boot2_utils.cpp$(ObjectSuffix) 
 
 
 
@@ -133,14 +133,6 @@ $(IntermediateDirectory)/boot2_vga.cpp$(DependSuffix): boot2/vga.cpp
 $(IntermediateDirectory)/boot2_vga.cpp$(PreprocessSuffix): boot2/vga.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_vga.cpp$(PreprocessSuffix) "boot2/vga.cpp"
 
-$(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix): boot2/memory.cpp $(IntermediateDirectory)/boot2_memory.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/memory.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/boot2_memory.cpp$(DependSuffix): boot2/memory.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/boot2_memory.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/boot2_memory.cpp$(DependSuffix) -MM "boot2/memory.cpp"
-
-$(IntermediateDirectory)/boot2_memory.cpp$(PreprocessSuffix): boot2/memory.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_memory.cpp$(PreprocessSuffix) "boot2/memory.cpp"
-
 $(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix): boot2/disk.cpp $(IntermediateDirectory)/boot2_disk.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/disk.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_disk.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/boot2_disk.cpp$(DependSuffix): boot2/disk.cpp
@@ -148,6 +140,14 @@ $(IntermediateDirectory)/boot2_disk.cpp$(DependSuffix): boot2/disk.cpp
 
 $(IntermediateDirectory)/boot2_disk.cpp$(PreprocessSuffix): boot2/disk.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_disk.cpp$(PreprocessSuffix) "boot2/disk.cpp"
+
+$(IntermediateDirectory)/boot2_utils.cpp$(ObjectSuffix): boot2/utils.cpp $(IntermediateDirectory)/boot2_utils.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/bootloader/boot2/utils.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/boot2_utils.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/boot2_utils.cpp$(DependSuffix): boot2/utils.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/boot2_utils.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/boot2_utils.cpp$(DependSuffix) -MM "boot2/utils.cpp"
+
+$(IntermediateDirectory)/boot2_utils.cpp$(PreprocessSuffix): boot2/utils.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/boot2_utils.cpp$(PreprocessSuffix) "boot2/utils.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

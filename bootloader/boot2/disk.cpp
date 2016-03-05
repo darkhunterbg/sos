@@ -165,11 +165,11 @@ bool DiskService::ReadFromHDD(ulong startSector, ushort lengthSectors, byte* out
 		    outBuffer += 2;
 		}
 
-//	    int x = 0;
-//	    for(uint i = 0; i < 1000000; ++i)
-//		{
-//			++x;
-//		}
+	    //	    int x = 0;
+	    //	    for(uint i = 0; i < 1000000; ++i)
+	    //		{
+	    //			++x;
+	    //		}
 	}
 
     return true;
@@ -181,17 +181,105 @@ void DiskService::DisableInterrups()
     Poll();
 }
 
-uint DiskService::ReadObjectsFromSector(ulong sector, FAT32Object* buffer)
-{
-    this->ReadFromHDD(sector, 1, reinterpret_cast<byte*>(buffer));
-    return 512 / 32;
-}
 ulong DiskService::GetRootSector() const
 {
     return bootRecord.reservedSectorsCount + extendedRecord.sectorsPerFAT * bootRecord.fatCount;
 }
 
-void DiskService::ReadFatTable(uint* buffer)
+long DiskService::GetDirectoryCluster(ulong currentDirCluster, const char* dirName, uint dirNameLength)
 {
-    ReadFromHDD(bootRecord.reservedSectorsCount, 1, reinterpret_cast<byte*>(buffer));
+    return GetObjectCluster(currentDirCluster, dirName, dirNameLength, nullptr, true);
+}
+long DiskService::GetObjectCluster(ulong currentDir, const char* name, uint nameLength, const char* ext, bool isDir)
+{
+    //FIND IF DIR EXISTS
+    //0 Load fat table for root
+    ulong sector = GetRootSector();
+    sector += currentDir * DiskService::CLUSTER_SIZE_SECTORS;
+    //  uint* fatTable = static_cast<uint*>(memoryService.Allocate(sizeof(uint) * 1 * 128));
+    // diskService.ReadFatTable(fatTable);
+    //
+    //1: Load first sector from root in memory
+
+    byte buffer[DiskService::SECTOR_SIZE_BYTES];
+    ReadFromHDD(sector, 1, buffer);
+    //2: Search entries for Directory
+
+    long dirCluster = -1;
+    for(uint i = 0; i < DiskService::SECTOR_SIZE_BYTES; i += sizeof(FAT32Object))
+	{
+	    //ATTRIBUTES ARE FUCNING UNRELIABLE
+
+	    if(buffer[i] == 0)
+		//No more entries! file not found
+		break;
+	    if(buffer[i] == 0xE5)
+		//Unused
+		continue;
+	    if(buffer[i + 11] == (byte)FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
+		//Long file entry
+		continue;
+
+	    FAT32Object& obj = *reinterpret_cast<FAT32Object*>(buffer + i);
+
+	    //vgaService.Print(obj->name,11);
+	    //vgaService.Print((uint)obj->attributes);
+	    //vgaService.Print('\n');
+
+	    if(isDir)
+		{
+		    if(!(byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY)
+			continue;
+		}
+	    else if(!(byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
+		continue;
+
+	    if(!isDir && !utils::Compare(obj.name + 8, ext, 3))
+		continue;
+
+	    if(utils::Compare(obj.name, name, nameLength))
+		{
+		    dirCluster = obj.firstClusterH;
+		    dirCluster = dirCluster << sizeof(ushort);
+		    dirCluster += obj.firstCluserL;
+		    dirCluster -= 2;
+		    break;
+		}
+	    //Do the same for 8 entries (aka whole cluster)
+	    //If at the end of the cluster there are still entries,
+	    //go to the FAT table and follow next cluster chain
+	}
+
+    return dirCluster;
+}
+
+long DiskService::GetFileCluster(ulong currentDirCluster, const char* fileName, uint fileNameLength, const char* extension)
+{
+    return GetObjectCluster(currentDirCluster, fileName, fileNameLength, extension, false);
+}
+
+bool DiskService::LoadFile(ulong fileCluster, void* address)
+{
+    uint fat[128];
+    ReadFromHDD(bootRecord.reservedSectorsCount, 1, (byte*)fat);
+
+    byte* buffer = (byte*)address;
+    ulong sector = GetRootSector();
+    uint cluster = fileCluster;
+    do
+	{
+	    for(uint i = 0; i < DiskService::CLUSTER_SIZE_SECTORS; ++i)
+		{
+		    ReadFromHDD(sector + cluster * DiskService::CLUSTER_SIZE_SECTORS + i, 1, buffer);
+		    buffer += DiskService::SECTOR_SIZE_BYTES;
+		}
+
+	    cluster = fat[cluster + 2];
+	    cluster = (cluster & 0x0FFFFFFF) - 2;
+		
+
+	}
+    while(cluster + 2 < 0x0FFFFFF7);
+
+    return true;
 }
