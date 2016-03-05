@@ -28,6 +28,7 @@
   <VirtualDirectory Name="kernel">
     <File Name="kernel.cpp"/>
     <File Name="Types.h"/>
+    <File Name="cpp.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="memory">
     <File Name="memory/MemorySystem.h"/>
@@ -131,4 +132,5 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="vga"/>
 </CodeLite_Project>
