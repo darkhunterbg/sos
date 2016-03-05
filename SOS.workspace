@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="SOS" Database="">
-  <Project Name="bootloader" Path="bootloader/bootloader.project" Active="Yes"/>
-  <Project Name="kernel" Path="kernel/kernel.project"/>
+  <Project Name="bootloader" Path="bootloader/bootloader.project" Active="No"/>
+  <Project Name="kernel" Path="kernel/kernel.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>

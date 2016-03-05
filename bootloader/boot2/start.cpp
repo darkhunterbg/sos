@@ -65,25 +65,22 @@ void boot2()
 	    uint dataDirectoriesSize = headers->optionalHeader.numberOfRvaAndSizes * sizeof(ImageDataDirectory);
 	    ImageSectionHeader* sections = (ImageSectionHeader*)((uint)headers + sizeof(ImageNtHeader) + dataDirectoriesSize);
 
-	    uint offset = 0;
 	    for(int i = 0; i < headers->fileHeader.numberOfSections; ++i)
 		{
 		    ImageSectionHeader& section = sections[i];
+
+		    uint offset = section.virtualAddress - headers->optionalHeader.addressOfEntryPoint;
+
 		    utils::Copy((void*)(section.pointerToRawData + kernelFile),
 		                (void*)(kernel + offset),
 		                section.sizeOfRawData);
-
-		    offset += section.sizeOfRawData;
 		}
 
 	    typedef int (*KernelStart)();
 
 	    KernelStart kernelStart = (KernelStart)(kernel);
 
-	    int result = kernelStart();
-	    vgaService.Print((uint)result);
-
-	    asm("hlt");
+	    kernelStart();
 	}
     //vgaService.Print(static_cast<uint>(diskService.GetBootRecord().reservedSectorsCount));
 

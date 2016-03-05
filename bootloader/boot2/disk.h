@@ -136,7 +136,6 @@ class DiskService
 
     const uint BOOT_RECORD_ADDRESS = 0x0 + 0x7c00;
 
-    void ReadBootRecord();
 	long GetObjectCluster(ulong currentDir,const char* name, uint nameLength,const char* ext, bool isDir);
 	static bool Poll();
 	static bool ReadFromHDD(ulong startSector, ushort lengthSectors, byte* outBuffer);

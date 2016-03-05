@@ -17,7 +17,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="kernel">
-    <File Name="start.cpp"/>
+    <File Name="kernel.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -36,7 +36,7 @@
       <Linker Options="@&quot;asmobjects.txt&quot; -Wl, -Ttext=0x20000;-nostdlib" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../Build/Debug/SOS/kernel.sys" IntermediateDirectory="./Debug" Command="./kernel.sys" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../Build/Debug/SOS/" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
-      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+      <Environment EnvVarSetName="bootloader" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
       <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">

@@ -4,16 +4,7 @@
 
 DiskService::DiskService()
 {
-    ReadBootRecord();
-}
-
-DiskService::~DiskService()
-{
-}
-
-void DiskService::ReadBootRecord()
-{
-    byte* ptr = reinterpret_cast<byte*>(BOOT_RECORD_ADDRESS);
+        byte* ptr = reinterpret_cast<byte*>(BOOT_RECORD_ADDRESS);
 
     utils::Copy(ptr + 3, bootRecord.oem, 8);
     bootRecord.oem[8] = '\0';
@@ -42,13 +33,11 @@ void DiskService::ReadBootRecord()
     extendedRecord.volumeLabel[11] = '\0';
     utils::Copy(ptr + 82, extendedRecord.identifier, 8);
     extendedRecord.identifier[8] = '\0';
-    // extendedRecord = reinterpret_cast<FAT32ExtendedBootRecord*>(BOOT_RECORD_ADDRESS + 36) ;
-    //
-    //	vgaService.Print(diskService.GetBootRecord().reservedSectorsCount +
-    //diskService.GetExtendedBootRecord().sectorsPerFAT * diskService.GetBootRecord().fatCount);
-    //
 }
 
+DiskService::~DiskService()
+{
+}
 bool DiskService::Poll()
 {
     while(true)

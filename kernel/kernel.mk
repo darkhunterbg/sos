@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/start.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) 
 
 
 
@@ -108,13 +108,13 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/start.cpp$(ObjectSuffix): start.cpp $(IntermediateDirectory)/start.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/start.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/start.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/start.cpp$(DependSuffix): start.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/start.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/start.cpp$(DependSuffix) -MM "start.cpp"
+$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix): kernel.cpp $(IntermediateDirectory)/kernel.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/kernel.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/kernel.cpp$(DependSuffix): kernel.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/kernel.cpp$(DependSuffix) -MM "kernel.cpp"
 
-$(IntermediateDirectory)/start.cpp$(PreprocessSuffix): start.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/start.cpp$(PreprocessSuffix) "start.cpp"
+$(IntermediateDirectory)/kernel.cpp$(PreprocessSuffix): kernel.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/kernel.cpp$(PreprocessSuffix) "kernel.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
