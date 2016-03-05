@@ -17,7 +17,7 @@ class VgaService
     Cursor cursor;
     byte* videoMemory = reinterpret_cast<byte*>(VgaService::VIDEO_MEMORY);
 
-    const uint VIDEO_MEMORY = 0xB8000;
+   static  const uint VIDEO_MEMORY = 0xB8000;
 
   public:
     static const uint COLUMNS = 80;

@@ -10,7 +10,7 @@ namespace VerifyBuild
     class Program
     {
         const int Boot1ValidSize = 422;
-        const int Boot2MaxSize = 4 * 1024 * 2;
+        const int Boot2MaxSize = 4 * 1024 ;
         static readonly byte[] BootSectorSignature = { 0x55, 0xAA };
         static readonly byte[] Boot2EntrySignature = { 0x55, 0x89 ,0xE5 };
 

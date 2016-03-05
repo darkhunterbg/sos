@@ -67,7 +67,7 @@ BootLoaderSize=422]]>
         <Command Enabled="yes">$(NASMDir)/nasm -f elf ./boot2/io.asm -o ./Debug/boot2_io.asm.o</Command>
       </PreBuild>
       <PostBuild>
-        <Command Enabled="yes">objcopy -O binary -j .text -j .rdata ./Debug/boot2.exe ../Build/Debug/boot2.bin</Command>
+        <Command Enabled="yes">objcopy -O binary -j .text ./Debug/boot2.exe ../Build/Debug/boot2.bin</Command>
         <Command Enabled="yes"/>
         <Command Enabled="yes">..\Tools\verify-build ../Build/Debug/</Command>
         <Command Enabled="yes"/>

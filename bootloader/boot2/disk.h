@@ -134,7 +134,7 @@ class DiskService
     FAT32ExtendedBootRecord extendedRecord;
     AtaIdentity primaryDiskInfo;
 
-    const uint BOOT_RECORD_ADDRESS = 0x0 + 0x7c00;
+    static const uint BOOT_RECORD_ADDRESS = 0x0 + 0x7c00;
 
 	long GetObjectCluster(ulong currentDir,const char* name, uint nameLength,const char* ext, bool isDir);
 	static bool Poll();
@@ -143,8 +143,6 @@ class DiskService
     static const uint CLUSTER_SIZE_SECTORS = 8;
     static const uint SECTOR_SIZE_BYTES = 512;
 
-	VgaService* vga;
-	
     DiskService();
     ~DiskService();
 

@@ -19,12 +19,14 @@ int start()
     return 0;
 }
 
+static const uint kernel = 0x20000;
+static const uint kernelFile = 0x200000;
+
 void boot2()
 {
     // MemoryService memoryService;
     DiskService diskService;
     VgaService vgaService;
-    diskService.vga = &vgaService;
 
     vgaService.ClearScreen(0x00);
 
@@ -46,15 +48,19 @@ void boot2()
     diskService.DetectPrimaryDisk();
     diskService.DisableInterrups();
 
-    long dirCluster = diskService.GetDirectoryCluster(0, "SOS", 3);
-    long fileCluster = diskService.GetFileCluster(dirCluster, "KERNEL", 6, "SYS");
+    char dir[] = "SOS";
+    char file[] = "KERNEL";
+    char ext[] = "SYS";
+    char error[] = "SOS/KERNEL.SYS not found!";
+
+    long dirCluster = diskService.GetDirectoryCluster(0, dir, 3);
+    long fileCluster = diskService.GetFileCluster(dirCluster, file, 6, ext);
     if(fileCluster < 0)
-	vgaService.Print("SOS/KERNEL.SYS not found!");
+	{
+	    vgaService.Print(error);
+	}
     else
 	{
-	    uint kernel = 0x20000; //- 0x400;
-	    uint kernelFile = 0x200000;
-
 	    diskService.LoadFile(fileCluster, (void*)kernelFile);
 
 	    ImageDosHeader* image = (ImageDosHeader*)kernelFile;

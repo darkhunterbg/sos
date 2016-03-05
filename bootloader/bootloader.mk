@@ -89,7 +89,7 @@ $(OutputFile): $(IntermediateDirectory)/.d $(Objects)
 
 PostBuild:
 	@echo Executing Post Build commands ...
-	objcopy -O binary -j .text -j .rdata ./Debug/boot2.exe ../Build/Debug/boot2.bin
+	objcopy -O binary -j .text ./Debug/boot2.exe ../Build/Debug/boot2.bin
 	
 	..\Tools\verify-build ../Build/Debug/
 	
