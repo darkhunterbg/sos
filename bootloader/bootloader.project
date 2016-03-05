@@ -73,7 +73,7 @@ BootLoaderSize=422]]>
         <Command Enabled="yes">..\Tools\verify-build ../Build/Debug/</Command>
         <Command Enabled="yes"/>
         <Command Enabled="yes">$(OSFMountDir)/OSFMount.com -a -t file -m $(DiskMountPoint) -f $(Disk) -o rw</Command>
-        <Command Enabled="yes">xcopy ..\Build\Debug\boot2.bin I:\boot2.bin /f /y</Command>
+        <Command Enabled="yes">xcopy ..\Build\Debug\boot2.bin I:\boot2.bin* /f /y</Command>
         <Command Enabled="yes">$(OSFMountDir)/OSFMount.com -D -m $(DiskMountPoint)</Command>
         <Command Enabled="yes">$(SFKDir)/sfk partcopy ../Build/Debug/boot1.bin 0 $(BootLoaderSize) $(Disk) $(BootLoaderOffset) -yes</Command>
       </PostBuild>

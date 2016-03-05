@@ -48,6 +48,7 @@ enum class FAT32ObjectAttribte : byte
 	FAT32OA_LONG_FILE_ENTRY = 0x01 | 0x02 | 0x04 | 0x08
 };
 
+
 struct FAT32Object
 {
 	char name[11];
@@ -62,7 +63,7 @@ struct FAT32Object
 	ushort modificationDate;
 	ushort firstCluserL;
 	uint size;
-};
+} __attribute__ ((packed));
 struct FAT32LongFileEntry
 {
 	byte order;
@@ -73,7 +74,7 @@ struct FAT32LongFileEntry
 	char secondChar[12];
 	ushort _zero;
 	char thirdChar[4];
-};
+} __attribute__ ((packed));
 
 enum class ATAIOPort : ushort
 {
@@ -155,4 +156,5 @@ class DiskService
     bool DetectPrimaryDisk();
 	ulong GetRootSector() const;
 	uint ReadObjectsFromSector(ulong sector, FAT32Object* buffer);
+	void ReadFatTable(uint* buffer);
 };

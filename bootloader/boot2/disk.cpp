@@ -164,6 +164,12 @@ bool DiskService::ReadFromHDD(ulong startSector, ushort lengthSectors, byte* out
 		    outBuffer[1] = data >> 8 & 0xFF;
 		    outBuffer += 2;
 		}
+
+//	    int x = 0;
+//	    for(uint i = 0; i < 1000000; ++i)
+//		{
+//			++x;
+//		}
 	}
 
     return true;
@@ -175,13 +181,17 @@ void DiskService::DisableInterrups()
     Poll();
 }
 
-
 uint DiskService::ReadObjectsFromSector(ulong sector, FAT32Object* buffer)
 {
-	 this->ReadFromHDD(sector, 1, reinterpret_cast<byte*>(buffer));
-	 return 512/ 32;
+    this->ReadFromHDD(sector, 1, reinterpret_cast<byte*>(buffer));
+    return 512 / 32;
 }
 ulong DiskService::GetRootSector() const
 {
-	return  bootRecord.reservedSectorsCount + extendedRecord.sectorsPerFAT * bootRecord.fatCount;
+    return bootRecord.reservedSectorsCount + extendedRecord.sectorsPerFAT * bootRecord.fatCount;
+}
+
+void DiskService::ReadFatTable(uint* buffer)
+{
+    ReadFromHDD(bootRecord.reservedSectorsCount, 1, reinterpret_cast<byte*>(buffer));
 }

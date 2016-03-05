@@ -94,7 +94,7 @@ PostBuild:
 	..\Tools\verify-build ../Build/Debug/
 	
 	'C:\Program Files\OSFMount'/OSFMount.com -a -t file -m I: -f 'D:\SOS\vm\disk.img' -o rw
-	xcopy ..\Build\Debug\boot2.bin I:\boot2.bin /f /y
+	xcopy ..\Build\Debug\boot2.bin I:\boot2.bin* /f /y
 	'C:\Program Files\OSFMount'/OSFMount.com -D -m I:
 	'C:\tools'/sfk partcopy ../Build/Debug/boot1.bin 0 $(BootLoaderSize) 'D:\SOS\vm\disk.img' $(BootLoaderOffset) -yes
 	@echo Done

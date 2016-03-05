@@ -41,30 +41,78 @@ void boot2()
 
 	vgaService.SetCursorPos(0, 12);*/
 
-    vgaService.SetCursorPos(0, 0);
-    if(!diskService.DetectPrimaryDisk())
-	{
-	    ShowFailed("Primary hard drive not found!\n", vgaService);
-	    asm("hlt");
-	}
+    const FAT32BootRecord& bootRecord = diskService.GetBootRecord();
+    const FAT32ExtendedBootRecord& extendedRecord = diskService.GetExtendedBootRecord();
 
+    vgaService.SetCursorPos(0, 0);
+    diskService.DetectPrimaryDisk();
     diskService.DisableInterrups();
 
-    long root = diskService.GetRootSector();
-    FAT32Object objects[16];
+    uint* fatTable = static_cast<uint*>(memoryService.Allocate(sizeof(uint) * 1 * 128));
 
-    for(int j = 0; j < 1; ++j)
+    diskService.ReadFatTable(fatTable);
+
+    //TODO: calculate fat sector and only read from disk!
+
+    //fat sector = 128 clusters
+    for(uint i = extendedRecord.fileSystemInfoSector + 1; i < 1 * 128; ++i)
 	{
-	    diskService.ReadObjectsFromSector(root + j, objects);
+	    uint rootCluster = fatTable[i];
+
+	    if(fatTable[i] == 0)
+		break;
+
+	    // vgaService.Print(fatTable[i]);
+	    vgaService.Print(' ');
+
+	    if(rootCluster >= 0x0FFFFFF8)
+		{
+		    vgaService.Print("DONE");
+		    //No more clusters in the chain
+		}
+	    else if(rootCluster == 0x0FFFFFF7)
+		{
+		    vgaService.Print("BAD");
+		    //Bad cluster
+		}
+	    else
+		{
+		    vgaService.Print(rootCluster  - 2);
+		    //Next cluster
+		}
+	}
+    vgaService.Print('\n');
+
+    byte buffer[512];
+    long root = diskService.GetRootSector();
+
+    uint cluster = 0;
+
+
+    for(uint j = cluster * 8; j < (cluster + 1) * 8; j++)
+	{
+	    diskService.ReadFromHDD(root + j, 1, buffer);
+	    for(int i = 0; i < 512; ++i)
+		vgaService.Print((char)buffer[i]);
+	}
+    //
+    // FAT32Object objects[16];
+
+    //  for(int j = 0; j < bootRecord.clusterSectors; ++j)
+    /*{
+	    diskService.ReadObjectsFromSector(root  , objects);
 	    for(int i = 15; i >= 0; --i)
 		{
 		    FAT32Object& obj = objects[i];
 
 		    if(obj.attributes == FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
 			{
-
 			    vgaService.SetCursorColor(0x17);
 			    FAT32LongFileEntry& entry = reinterpret_cast<FAT32LongFileEntry&>(obj);
+
+			    vgaService.Print('[');
+			    vgaService.Print((uint)entry.order);
+			    vgaService.Print(']');
 
 			    vgaService.PrintUTF16(entry.firstChar, 10);
 			    vgaService.PrintUTF16(entry.secondChar, 12);
@@ -76,25 +124,26 @@ void boot2()
 				continue;
 			    if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY)
 				vgaService.SetCursorColor(0x13);
-			    else  if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
-						vgaService.SetCursorColor(0x14);
-					else
+			    else if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
+				vgaService.SetCursorColor(0x14);
+			    else
 				vgaService.SetCursorColor(0x17);
 			    vgaService.Print('\n');
 			    vgaService.Print(obj.name, 11);
 			    vgaService.Print(' ');
 			    vgaService.Print((uint)obj.attributes);
-				vgaService.Print(' ');
+			    vgaService.Print(' ');
 			}
 		}
 
-	    /*vgaService.Print(objects[i].name);
+		vgaService.Print(objects[i].name);
 	    vgaService.Print(' ');
 	    vgaService.Print(static_cast<uint>(objects[i].attributes));
 	    vgaService.Print(' ');
 	    vgaService.Print(objects[i].size);
-	    vgaService.Print('\n');*/
+	    vgaService.Print('\n');
 	}
+	*/
     //vgaService.Print(static_cast<uint>(diskService.GetBootRecord().reservedSectorsCount));
 
     //byte* buffer = static_cast<byte*>(memoryService.Allocate(sizeof(byte)* DiskService::SECTOR_SIZE_BYTES));
@@ -129,19 +178,6 @@ void boot2()
 	}*/
 
     asm("hlt");
-}
-
-void ShowSuccess(const char* msg, VgaService& vgaService)
-{
-    // vgaService.SetCursorPos(0, 20);
-    vgaService.SetCursorColor(0x02);
-    vgaService.Print(msg);
-}
-void ShowFailed(const char* msg, VgaService& vgaService)
-{
-    // vgaService.SetCursorPos(0, 20);
-    vgaService.SetCursorColor(0x04);
-    vgaService.Print(msg);
 }
 
 /*void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
