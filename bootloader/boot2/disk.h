@@ -149,10 +149,6 @@ class DiskService
     DiskService();
     ~DiskService();
 
-    const FAT32BootRecord& GetBootRecord() const;
-    const FAT32ExtendedBootRecord& GetExtendedBootRecord() const;
-
-
 
 	void DisableInterrups();
     bool DetectPrimaryDisk();

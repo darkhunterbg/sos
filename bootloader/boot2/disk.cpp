@@ -11,16 +11,6 @@ DiskService::~DiskService()
 {
 }
 
-const FAT32BootRecord& DiskService::GetBootRecord() const
-{
-    return bootRecord;
-}
-
-const FAT32ExtendedBootRecord& DiskService::GetExtendedBootRecord() const
-{
-    return extendedRecord;
-}
-
 void DiskService::ReadBootRecord()
 {
     byte* ptr = reinterpret_cast<byte*>(BOOT_RECORD_ADDRESS);

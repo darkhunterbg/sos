@@ -32,8 +32,8 @@
     <File Name="boot2/utils.h"/>
     <File Name="boot2/io.asm"/>
     <File Name="boot2/io.h"/>
-    <File Name="boot2/idt.h"/>
     <File Name="boot2/utils.cpp"/>
+    <File Name="boot2/pe.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

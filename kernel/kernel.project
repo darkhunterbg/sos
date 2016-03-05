@@ -30,10 +30,10 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
     <Configuration Name="Debug" CompilerType="MinGW ( MinGW )" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
-      <Compiler Options="-pedantic-errors;-ansi;-pedantic;-W;-std=c++14;-Wall;-nostdlib;-fno-rtti;-fno-exceptions;-mno-sse;-mno-sse2; -O0;" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+      <Compiler Options="-pedantic-errors;-ansi;-pedantic;-W;-std=c++14;-Wall;-fno-rtti;-fno-exceptions;-mno-sse;-mno-sse2; -nostdlib; -O0;" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
       </Compiler>
-      <Linker Options="-s;@&quot;asmobjects.txt&quot; -Wl,-Ttext=0x20000;-nostdlib" Required="yes"/>
+      <Linker Options="@&quot;asmobjects.txt&quot; -Wl, -Ttext=0x20000;-nostdlib" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="../Build/Debug/SOS/kernel.sys" IntermediateDirectory="./Debug" Command="./kernel.sys" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="../Build/Debug/SOS/" PauseExecWhenProcTerminates="no" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">

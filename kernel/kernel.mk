@@ -37,7 +37,7 @@ PCHCompileFlags        :=
 MakeDirCommand         :=makedir
 RcCmpOptions           := 
 RcCompilerName         :=C:/MinGW/bin/windres.exe
-LinkOptions            :=  -s @"asmobjects.txt" -Wl,-Ttext=0x20000 -nostdlib
+LinkOptions            :=  @"asmobjects.txt" -Wl, -Ttext=0x20000 -nostdlib
 IncludePath            :=  $(IncludeSwitch). $(IncludeSwitch). 
 IncludePCH             := 
 RcIncludePath          := 
@@ -52,7 +52,7 @@ LibPath                := $(LibraryPathSwitch).
 AR       := C:/MinGW/bin/ar.exe rcu
 CXX      := C:/MinGW/bin/g++.exe
 CC       := C:/MinGW/bin/gcc.exe
-CXXFLAGS :=  -pedantic-errors -ansi -pedantic -W -std=c++14 -Wall -nostdlib -fno-rtti -fno-exceptions -mno-sse -mno-sse2  -O0  $(Preprocessors)
+CXXFLAGS :=  -pedantic-errors -ansi -pedantic -W -std=c++14 -Wall -fno-rtti -fno-exceptions -mno-sse -mno-sse2  -nostdlib  -O0  $(Preprocessors)
 CFLAGS   :=  -g -O0 -Wall $(Preprocessors)
 ASFLAGS  := 
 AS       := C:/MinGW/bin/as.exe

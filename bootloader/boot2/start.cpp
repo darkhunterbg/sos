@@ -6,6 +6,7 @@
 #include "disk.h"
 #include "io.h"
 #include "utils.h"
+#include "pe.h"
 
 void boot2();
 void PrintDiskInfo(DiskService&, VgaService&);
@@ -51,9 +52,38 @@ void boot2()
 	vgaService.Print("SOS/KERNEL.SYS not found!");
     else
 	{
-	    diskService.LoadFile(fileCluster, (void*)0x20000);
-	    vgaService.Print((char*)0x2004E);
-	    // vgaService.Print((uint)fileCluster);
+	    uint kernel = 0x20000; //- 0x400;
+	    uint kernelFile = 0x200000;
+
+	    diskService.LoadFile(fileCluster, (void*)kernelFile);
+
+	    ImageDosHeader* image = (ImageDosHeader*)kernelFile;
+	    ImageNtHeader* headers = (ImageNtHeader*)(kernelFile + image->lfanew);
+	    //uint entryPoint = headers->optionalHeader.addressOfEntryPoint;
+	    //uint base = headers->optionalHeader.imageBase;
+
+	    uint dataDirectoriesSize = headers->optionalHeader.numberOfRvaAndSizes * sizeof(ImageDataDirectory);
+	    ImageSectionHeader* sections = (ImageSectionHeader*)((uint)headers + sizeof(ImageNtHeader) + dataDirectoriesSize);
+
+	    uint offset = 0;
+	    for(int i = 0; i < headers->fileHeader.numberOfSections; ++i)
+		{
+		    ImageSectionHeader& section = sections[i];
+		    utils::Copy((void*)(section.pointerToRawData + kernelFile),
+		                (void*)(kernel + offset),
+		                section.sizeOfRawData);
+
+		    offset += section.sizeOfRawData;
+		}
+
+	    typedef int (*KernelStart)();
+
+	    KernelStart kernelStart = (KernelStart)(kernel);
+
+	    int result = kernelStart();
+	    vgaService.Print((uint)result);
+
+	    asm("hlt");
 	}
     //vgaService.Print(static_cast<uint>(diskService.GetBootRecord().reservedSectorsCount));
 
@@ -87,8 +117,6 @@ void boot2()
 		    ++x;
 		}
 	}*/
-
-    asm("hlt");
 }
 
 /*void PrintDiskInfo(DiskService& diskService, VgaService& vgaService)
