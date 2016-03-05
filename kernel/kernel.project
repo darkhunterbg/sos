@@ -132,5 +132,11 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="vga"/>
+  <VirtualDirectory Name="vga">
+    <File Name="vga/VGATextSystem.h"/>
+    <File Name="vga/VGATextSystem.cpp"/>
+    <File Name="vga/IVGADriver.h"/>
+    <File Name="vga/DefaultVGADriver.h"/>
+    <File Name="vga/DefaultVGADriver.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>

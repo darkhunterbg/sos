@@ -1,1 +1,1 @@
-./Debug/kernel.cpp.o ./Debug/memory_MemorySystem.cpp.o   
+./Debug/kernel.cpp.o ./Debug/memory_MemorySystem.cpp.o ./Debug/vga_VGATextSystem.cpp.o ./Debug/vga_DefaultVGADriver.cpp.o   

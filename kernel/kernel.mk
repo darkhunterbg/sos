@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) 
 
 
 
@@ -127,6 +127,22 @@ $(IntermediateDirectory)/memory_MemorySystem.cpp$(DependSuffix): memory/MemorySy
 
 $(IntermediateDirectory)/memory_MemorySystem.cpp$(PreprocessSuffix): memory/MemorySystem.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/memory_MemorySystem.cpp$(PreprocessSuffix) "memory/MemorySystem.cpp"
+
+$(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix): vga/VGATextSystem.cpp $(IntermediateDirectory)/vga_VGATextSystem.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/vga/VGATextSystem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/vga_VGATextSystem.cpp$(DependSuffix): vga/VGATextSystem.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/vga_VGATextSystem.cpp$(DependSuffix) -MM "vga/VGATextSystem.cpp"
+
+$(IntermediateDirectory)/vga_VGATextSystem.cpp$(PreprocessSuffix): vga/VGATextSystem.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(PreprocessSuffix) "vga/VGATextSystem.cpp"
+
+$(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix): vga/DefaultVGADriver.cpp $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/vga/DefaultVGADriver.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(DependSuffix): vga/DefaultVGADriver.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(DependSuffix) -MM "vga/DefaultVGADriver.cpp"
+
+$(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(PreprocessSuffix): vga/DefaultVGADriver.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(PreprocessSuffix) "vga/DefaultVGADriver.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
