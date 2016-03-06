@@ -1,14 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="kernel" InternalType="Console">
-  <Reconciliation>
-    <Regexes/>
-    <Excludepaths/>
-    <Ignorefiles/>
-    <Extensions>
-      <![CDATA[cpp;c;h;hpp;xrc;wxcp;fbp]]>
-    </Extensions>
-    <Topleveldir>../kernel</Topleveldir>
-  </Reconciliation>
   <Plugins>
     <Plugin Name="CMakePlugin">
       <![CDATA[[{
@@ -23,6 +14,15 @@
  }]]]>
     </Plugin>
   </Plugins>
+  <Reconciliation>
+    <Regexes/>
+    <Excludepaths/>
+    <Ignorefiles/>
+    <Extensions>
+      <![CDATA[cpp;c;h;hpp;xrc;wxcp;fbp]]>
+    </Extensions>
+    <Topleveldir>../kernel</Topleveldir>
+  </Reconciliation>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="kernel">
@@ -40,6 +40,11 @@
     <File Name="vga/IVGADriver.h"/>
     <File Name="vga/DefaultVGADriver.h"/>
     <File Name="vga/DefaultVGADriver.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="cpu">
+    <File Name="cpu/cpu.asm"/>
+    <File Name="cpu/cpu.h"/>
+    <File Name="cpu/cpu.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -68,6 +73,7 @@
       </Debugger>
       <PreBuild>
         <Command Enabled="yes">pre.bat</Command>
+        <Command Enabled="yes">$(NASMDir)/nasm -f elf ./cpu/cpu.asm -o ./Debug/cpu_cpu.asm.o</Command>
       </PreBuild>
       <PostBuild>
         <Command Enabled="yes"/>
