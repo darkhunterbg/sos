@@ -4,10 +4,9 @@ void kmain();
 
 int start()
 {
-	
-	
-     goto *(void*)&kmain;
-	 return -1;
+
+    goto*(void*)&kmain;
+    return -1;
 }
 
 #include "cpp.h"
@@ -27,13 +26,18 @@ void kmain()
     MemorySystem* memorySystem = reinterpret_cast<MemorySystem*>(MEMORY_MANAGER_ADDRESS);
     memorySystem->Initialize();
     memorySystem->DetectMemory();
-	
-	VGATextSystem* vgaTextSystem = new VGATextSystem();
-	vgaTextSystem->SetDriver(new DefaultVGADriver());
-	
-	vgaTextSystem->PrintText("Welcome to the real kernel!");
-	
-	delete vgaTextSystem;
-	
+
+    VGATextSystem* vgaTextSystem = new VGATextSystem();
+    vgaTextSystem->SetDriver(new DefaultVGADriver());
+
+    vgaTextSystem->GetCursor().backgroundColor = 1;
+    /*for(int i=0;i<2000;++i)
+		vgaTextSystem->PrintText(" ");*/
+    vgaTextSystem->ClearScreen();
+    vgaTextSystem->PrintText("Welcome to the real kernel!\n");
+    vgaTextSystem->PrintText("OPS! Just BSODed kinda...");
+
+    delete vgaTextSystem;
+
     asm("hlt");
 }

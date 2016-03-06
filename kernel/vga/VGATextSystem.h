@@ -4,6 +4,15 @@
 
 namespace vga
 {
+
+struct Cursor
+{
+    uint x = 0;
+    uint y = 0;
+    byte foregroundColor = 0xF;
+    byte backgroundColor = 0;
+};
+
 class VGATextSystem
 {
     VGATextSystem(const& VGATextSystem) = delete;
@@ -11,13 +20,17 @@ class VGATextSystem
 
   private:
     IVGADriver* driver = nullptr;
+    Cursor cursor;
 
   public:
     VGATextSystem() = default;
-    ~VGATextSystem() ;
+    ~VGATextSystem();
 
     void SetDriver(IVGADriver* ownDriver);
-	
-	void PrintText(const char* text);
+    IVGADriver* GetDriver();
+    void PrintText(const char* text);
+    void ClearScreen();
+
+    Cursor& GetCursor();
 };
 }

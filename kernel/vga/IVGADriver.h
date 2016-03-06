@@ -4,6 +4,17 @@
 
 namespace vga
 {
+struct VGAPalette
+{
+    byte* colors;
+    uint colorsCount;
+};
+struct VGAParameters
+{
+    uint textColumns;
+    uint textRows;
+};
+
 class IVGADriver
 {
     IVGADriver(const& IVGADriver) = delete;
@@ -11,9 +22,13 @@ class IVGADriver
 
   public:
     IVGADriver() = default;
-    virtual ~IVGADriver() {}
+    virtual ~IVGADriver()
+    {
+    }
 
-
-     virtual bool Print(char symbol, uint x, uint y, uint page, byte color) = 0;
+    virtual void Print(char symbol, uint x, uint y, byte color) = 0;
+	virtual void ClearScreen(byte color) = 0;
+    virtual const VGAPalette& GetPalette() const = 0;
+    virtual const VGAParameters& GetParameters() const = 0;
 };
 }

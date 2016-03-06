@@ -15,15 +15,45 @@ void VGATextSystem::SetDriver(IVGADriver* driver)
 
     this->driver = driver;
 }
+IVGADriver* VGATextSystem::GetDriver()
+{
+    return driver;
+}
+
+void VGATextSystem::ClearScreen()
+{
+	driver->ClearScreen(cursor.backgroundColor);
+}
 
 void VGATextSystem::PrintText(const char* text)
 {
-    int x = 0;
+    byte color = (cursor.backgroundColor << 4) + cursor.foregroundColor;
+
+    const VGAParameters params = driver->GetParameters();
+
     while(*text != '\0')
 	{
-	    driver->Print(*text, x, 0, 0, 0x0F);
-		++x;
-		++text;
+	    if(*text == '\n' || *text == '\r')
+		{
+		    cursor.x = 0;
+		    ++cursor.y;
+		}
+	    else
+		{
+		    driver->Print(*text, cursor.x, cursor.y, color);
+		    ++cursor.x;
+		    if(cursor.x == params.textColumns)
+			{
+			    cursor.x = 0;
+			    ++cursor.y;
+			}
+		}
+	    ++text;
 	}
+}
+
+Cursor& VGATextSystem::GetCursor()
+{
+    return cursor;
 }
 }
