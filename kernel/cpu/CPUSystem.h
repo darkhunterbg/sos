@@ -35,4 +35,6 @@ class CPUSystem
 	void SetInterruptGate(byte gate, void* function);
 };
 
+extern "C" void TestMethod();
+
 }

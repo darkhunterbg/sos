@@ -46,4 +46,10 @@ void CPUSystem::DefaultInterruptHandle()
 {
     asm("hlt");
 }
+
+void TestMethod()
+{
+	asm("hlt");
+}
+
 }

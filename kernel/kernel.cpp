@@ -43,6 +43,7 @@ void kmain()
 
     vgaTextSystem->ClearScreen();
 
+	//TestMethod();
     //vgaTextSystem->PrintText("Welcome to the real kernel!\n");
 
     cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
