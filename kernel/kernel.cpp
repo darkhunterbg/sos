@@ -1,9 +1,13 @@
+#pragma GCC diagnostic ignored "-Wpedantic"
 
-int kmain(int argc, char** argv);
+void kmain();
 
 int start()
 {
-    return kmain(0, nullptr);
+	
+	
+     goto *(void*)&kmain;
+	 return -1;
 }
 
 #include "cpp.h"
@@ -18,7 +22,7 @@ using namespace vga;
 static const uint KERNEL_ADDRESS = 0x10'00'00;            // 1 MB, up to 14 MB for the kernel
 static const uint MEMORY_MANAGER_ADDRESS = 0x01'00'00'00; //16 Mb
 
-int kmain(int, char**)
+void kmain()
 {
     MemorySystem* memorySystem = reinterpret_cast<MemorySystem*>(MEMORY_MANAGER_ADDRESS);
     memorySystem->Initialize();
@@ -32,6 +36,4 @@ int kmain(int, char**)
 	delete vgaTextSystem;
 	
     asm("hlt");
-
-    return 0;
 }

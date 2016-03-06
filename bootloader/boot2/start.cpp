@@ -8,22 +8,14 @@
 #include "utils.h"
 #include "pe.h"
 
-void boot2();
-void PrintDiskInfo(DiskService&, VgaService&);
-void ShowSuccess(const char* msg, VgaService& vgaService);
-void ShowFailed(const char* msg, VgaService& vgaService);
 
-int start()
-{
-    boot2();
-    return 0;
-}
 
 static const uint kernel =		0x10'00'00;			//1 MB
 static const uint kernelFile =	0x01'00'00'00;	//16 MB
 
-void boot2()
+int start()
 {
+    
     // MemoryService memoryService;
     DiskService diskService;
     VgaService vgaService;
@@ -82,12 +74,10 @@ void boot2()
 		                section.sizeOfRawData);
 		}
 
-	    typedef int (*KernelStart)();
-
-	    KernelStart kernelStart = (KernelStart)(kernel);
-
-	    kernelStart();
+		goto *(void*)(kernel);
 	}
+	
+	return 1;
     //vgaService.Print(static_cast<uint>(diskService.GetBootRecord().reservedSectorsCount));
 
     //byte* buffer = static_cast<byte*>(memoryService.Allocate(sizeof(byte)* DiskService::SECTOR_SIZE_BYTES));
