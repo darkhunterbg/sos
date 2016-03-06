@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_cpu.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) 
 
 
 
@@ -145,13 +145,13 @@ $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(DependSuffix): vga/DefaultVGA
 $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(PreprocessSuffix): vga/DefaultVGADriver.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(PreprocessSuffix) "vga/DefaultVGADriver.cpp"
 
-$(IntermediateDirectory)/cpu_cpu.cpp$(ObjectSuffix): cpu/cpu.cpp $(IntermediateDirectory)/cpu_cpu.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/cpu/cpu.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/cpu_cpu.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/cpu_cpu.cpp$(DependSuffix): cpu/cpu.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/cpu_cpu.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/cpu_cpu.cpp$(DependSuffix) -MM "cpu/cpu.cpp"
+$(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix): cpu/CPUSystem.cpp $(IntermediateDirectory)/cpu_CPUSystem.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/cpu/CPUSystem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/cpu_CPUSystem.cpp$(DependSuffix): cpu/CPUSystem.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/cpu_CPUSystem.cpp$(DependSuffix) -MM "cpu/CPUSystem.cpp"
 
-$(IntermediateDirectory)/cpu_cpu.cpp$(PreprocessSuffix): cpu/cpu.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_cpu.cpp$(PreprocessSuffix) "cpu/cpu.cpp"
+$(IntermediateDirectory)/cpu_CPUSystem.cpp$(PreprocessSuffix): cpu/CPUSystem.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(PreprocessSuffix) "cpu/CPUSystem.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

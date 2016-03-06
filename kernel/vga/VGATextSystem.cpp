@@ -22,7 +22,8 @@ IVGADriver* VGATextSystem::GetDriver()
 
 void VGATextSystem::ClearScreen()
 {
-	driver->ClearScreen(cursor.backgroundColor);
+    driver->ClearScreen(cursor.backgroundColor);
+    cursor.x = cursor.y = 0;
 }
 
 void VGATextSystem::PrintText(const char* text)

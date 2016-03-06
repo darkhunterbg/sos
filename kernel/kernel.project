@@ -43,8 +43,8 @@
   </VirtualDirectory>
   <VirtualDirectory Name="cpu">
     <File Name="cpu/cpu.asm"/>
-    <File Name="cpu/cpu.h"/>
-    <File Name="cpu/cpu.cpp"/>
+    <File Name="cpu/CPUSystem.cpp"/>
+    <File Name="cpu/CPUSystem.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

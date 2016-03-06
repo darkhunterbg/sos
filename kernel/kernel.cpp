@@ -14,42 +14,56 @@ int start()
 #include "memory/MemorySystem.h"
 #include "vga/VGATextSystem.h"
 #include "vga/DefaultVGADriver.h"
-#include "cpu/cpu.h"
+#include "cpu/CPUSystem.h"
 
 using namespace memory;
 using namespace vga;
+using namespace cpu;
 
-static const uint KERNEL_ADDRESS = 0x10'00'00;            // 1 MB, up to 14 MB for the kernel
-static const uint MEMORY_MANAGER_ADDRESS = 0x01'00'00'00; //16 Mb
+static const uint KERNEL_ADDRESS = 0x10'00'00;                                           // 1 MB, up to 14 MB for the kernel
+static const uint MEMORY_MANAGER_ADDRESS = CPUSystem::IDT_ADDRESS + CPUSystem::IDT_SIZE; //16.002 Mb
 
-void Interrupt()
-{
-}
+void Interrupt();
+
+VGATextSystem* v;
 
 void kmain()
 {
-
-
     MemorySystem* memorySystem = reinterpret_cast<MemorySystem*>(MEMORY_MANAGER_ADDRESS);
     memorySystem->Initialize();
     memorySystem->DetectMemory();
 
+    CPUSystem* cpuSystem = new CPUSystem();
+    cpuSystem->Initialize();
+
     VGATextSystem* vgaTextSystem = new VGATextSystem();
     vgaTextSystem->SetDriver(new DefaultVGADriver());
-
-    vgaTextSystem->GetCursor().backgroundColor = 1;
+    v = vgaTextSystem;
 
     vgaTextSystem->ClearScreen();
     vgaTextSystem->PrintText("Welcome to the real kernel!\n");
-    vgaTextSystem->PrintText("OPS! Just BSODed kinda...");
 
-	cpu::LoadIDT();
+    cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
 
+    int a = 0;
+    for(long long i = 0; i < 10000000; ++i)
+	{
+	    ++a;
+	}
 
-     int x = 5;
+    int x = 5;
     x /= 0;
 
-   // delete vgaTextSystem;
+    delete vgaTextSystem;
+    delete cpuSystem;
 
     //asm("hlt");
+}
+
+void Interrupt()
+{
+    v->GetCursor().backgroundColor = 1;
+    v->ClearScreen();
+    v->PrintText("OPS! Just BSODed kinda...");
+    asm("hlt");
 }
