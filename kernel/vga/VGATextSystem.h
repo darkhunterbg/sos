@@ -13,6 +13,13 @@ struct Cursor
     byte backgroundColor = 0;
 };
 
+enum class NumberFormatting
+{
+	NF_DECIMAL = 10,
+	NF_HEX = 16,
+	NF_BINARY = 2,
+};
+
 class VGATextSystem
 {
     VGATextSystem(const& VGATextSystem) = delete;
@@ -29,6 +36,7 @@ class VGATextSystem
     void SetDriver(IVGADriver* ownDriver);
     IVGADriver* GetDriver();
     void PrintText(const char* text);
+	void PrintNumber(uint number,NumberFormatting formatting =NumberFormatting::NF_DECIMAL);
     void ClearScreen();
 
     Cursor& GetCursor();

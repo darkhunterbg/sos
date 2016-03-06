@@ -52,6 +52,47 @@ void VGATextSystem::PrintText(const char* text)
 	    ++text;
 	}
 }
+void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
+{
+    uint tmp = number;
+    uint length = 0;
+    do
+	{
+	    ++length;
+	    tmp /= (uint)formatting;
+	}
+    while(tmp > 0);
+
+    char buffer[33];
+
+    int offset = 0;
+
+    if(formatting == NumberFormatting::NF_HEX)
+	{
+	    buffer[0] = '0';
+	    buffer[1] = 'x';
+	    offset = 2;
+	}
+	else if( formatting == NumberFormatting::NF_BINARY)
+	{
+		buffer[0] = 'b';
+		offset = 1;
+	}
+    for(int i = length - 1; i >= 0; --i)
+	{
+	    uint n = number % (uint)(formatting);
+
+	    buffer[offset + i] = n + '0';
+	    if(n > 9)
+		buffer[offset + i] += 7;
+		
+	    number /= (uint)formatting;
+	}
+
+    buffer[length + offset] = '\0';
+
+    PrintText(buffer);
+}
 
 Cursor& VGATextSystem::GetCursor()
 {

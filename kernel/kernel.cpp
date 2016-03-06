@@ -45,14 +45,7 @@ void kmain()
 
     cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
 
-    int a = 0;
-    for(long long i = 0; i < 10000000; ++i)
-	{
-	    ++a;
-	}
-
-    int x = 5;
-    x /= 0;
+    asm("hlt");
 
     delete vgaTextSystem;
     delete cpuSystem;
