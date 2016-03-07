@@ -48,9 +48,6 @@ void kmain()
 
     cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
 
-    int x = 3;
-    x /= 0;
-
     DrawGUI(*vgaTextSystem);
 
     asm("hlt");
@@ -63,9 +60,12 @@ void kmain()
 
 void Interrupt(const regs& r)
 {
+	v->GetCursor().foregroundColor = 0x0F;
     v->GetCursor().backgroundColor = 1;
     v->ClearScreen();
-    v->PrintText("OPS! Just BSODed kinda...\n");
+    v->PrintText("Something went puff!\n");
+
+   v->PrintText("DivisionByZeroException\n");
 
     v->PrintText("Interrupt:");
     v->PrintNumber(r.int_no, NumberFormatting::NF_HEX);
@@ -153,5 +153,7 @@ void DrawGUI(VGATextSystem& vgaSystem)
 		    vgaSystem.PrintText(" ");
 		    ++x;
 		}
+
+	    x /= 0;
 	}
 }
