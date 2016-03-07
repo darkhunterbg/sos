@@ -23,7 +23,7 @@ using namespace cpu;
 static const uint KERNEL_ADDRESS = 0x10'00'00;                                           // 1 MB, up to 14 MB for the kernel
 static const uint MEMORY_MANAGER_ADDRESS = CPUSystem::IDT_ADDRESS + CPUSystem::IDT_SIZE; //16.002 Mb
 
-void Interrupt();
+void Interrupt(const regs& r);
 void DrawGUI(VGATextSystem&);
 
 VGATextSystem* v;
@@ -43,10 +43,13 @@ void kmain()
 
     vgaTextSystem->ClearScreen();
 
-	//TestMethod();
+    //TestMethod();
     //vgaTextSystem->PrintText("Welcome to the real kernel!\n");
 
     cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
+
+    int x = 3;
+    x /= 0;
 
     DrawGUI(*vgaTextSystem);
 
@@ -58,11 +61,54 @@ void kmain()
     //asm("hlt");
 }
 
-void Interrupt()
+void Interrupt(const regs& r)
 {
     v->GetCursor().backgroundColor = 1;
     v->ClearScreen();
-    v->PrintText("OPS! Just BSODed kinda...");
+    v->PrintText("OPS! Just BSODed kinda...\n");
+
+    v->PrintText("Interrupt:");
+    v->PrintNumber(r.int_no, NumberFormatting::NF_HEX);
+    v->PrintText(" Error Code:");
+    v->PrintNumber(r.int_no, NumberFormatting::NF_HEX);
+
+    v->PrintText("\nDS:");
+    v->PrintNumber(r.ds, NumberFormatting::NF_HEX);
+    v->PrintText(" ES:");
+    v->PrintNumber(r.es, NumberFormatting::NF_HEX);
+    v->PrintText(" FS:");
+    v->PrintNumber(r.fs, NumberFormatting::NF_HEX);
+    v->PrintText(" GS:");
+    v->PrintNumber(r.gs, NumberFormatting::NF_HEX);
+
+    v->PrintText("\nEDI:");
+    v->PrintNumber(r.edi, NumberFormatting::NF_HEX);
+    v->PrintText(" ESI:");
+    v->PrintNumber(r.esi, NumberFormatting::NF_HEX);
+    v->PrintText(" EBP:");
+    v->PrintNumber(r.ebp, NumberFormatting::NF_HEX);
+    v->PrintText(" ESP:");
+    v->PrintNumber(r.esp, NumberFormatting::NF_HEX);
+    v->PrintText("\nEAX:");
+    v->PrintNumber(r.eax, NumberFormatting::NF_HEX);
+    v->PrintText(" EBX:");
+    v->PrintNumber(r.ebx, NumberFormatting::NF_HEX);
+    v->PrintText(" ECX:");
+    v->PrintNumber(r.ecx, NumberFormatting::NF_HEX);
+    v->PrintText(" EDX:");
+    v->PrintNumber(r.edx, NumberFormatting::NF_HEX);
+
+    v->PrintText("\nEIP:");
+    v->PrintNumber(r.eip, NumberFormatting::NF_HEX);
+    v->PrintText(" CS:");
+    v->PrintNumber(r.cs, NumberFormatting::NF_HEX);
+    v->PrintText(" EFLAGS:");
+    v->PrintNumber(r.eflags, NumberFormatting::NF_HEX);
+    v->PrintText(" USERESP:");
+    v->PrintNumber(r.useresp, NumberFormatting::NF_HEX);
+    v->PrintText(" SS:");
+    v->PrintNumber(r.ss, NumberFormatting::NF_HEX);
+
     asm("hlt");
 }
 

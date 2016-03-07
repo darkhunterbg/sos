@@ -4,21 +4,30 @@ SECTION .text
 
 bits 32
 
-extern _TestMethod
+extern __fault
 
 global _load_idt
+global isr_common_stub
+
 
 idt:
 	dw 8 * 256 - 1
 	dd 0x1000000
 	
 _load_idt:
-	;jmp _TestMethod
 	lidt [idt]
 	ret
 
 GDT_CODE equ 0x08
 GDT_DATA equ 0x10
+
+global _isr0
+
+_isr0:
+	cli
+	push byte 0
+	push byte 0
+	jmp isr_common_stub
 
 ; This is our common ISR stub. It saves the processor state, sets
 ; up for kernel mode segments, calls the C-level fault handler,
@@ -36,7 +45,7 @@ isr_common_stub:
     mov gs, ax
     mov eax, esp   ; Push us the stack
     push eax
-    mov eax, _TestMethod
+    mov eax, __fault
     call eax       ; A special call, preserves the 'eip' register
     pop eax
     pop gs

@@ -4,6 +4,7 @@ namespace cpu
 {
 
 extern "C" void load_idt();
+extern "C" void isr0();
 
 CPUSystem::CPUSystem()
 {
@@ -31,14 +32,18 @@ void CPUSystem::Initialize()
     load_idt();
 }
 
+void* intFunction;
+
 void CPUSystem::SetInterruptGate(byte gate, void* function)
 {
+	intFunction = function;
+	
 	 idtTable[gate] = {
-	        (ushort)(((uint)function) & 0xFFFF),
+	        (ushort)(((uint)&isr0) & 0xFFFF),
 	        8,
 	        0,
 	        0b10001110,
-	        (ushort)(((uint)function >> 16) & 0xFFFF),
+	        (ushort)(((uint)&isr0 >> 16) & 0xFFFF),
 	    };
 }
 
@@ -47,9 +52,11 @@ void CPUSystem::DefaultInterruptHandle()
     asm("hlt");
 }
 
-void TestMethod()
+void _fault(regs *r)
 {
-	asm("hlt");
+	typedef void(*Action)(const regs&);
+	
+	((Action)intFunction)(*r);
 }
 
 }

@@ -72,11 +72,14 @@ void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
 	    buffer[0] = '0';
 	    buffer[1] = 'x';
 	    offset = 2;
+	    for(int i = 0; i < 8 - length; i++)
+		buffer[2 + i] = '0';
+	    offset += 8 - length;
 	}
-	else if( formatting == NumberFormatting::NF_BINARY)
+    else if(formatting == NumberFormatting::NF_BINARY)
 	{
-		buffer[0] = 'b';
-		offset = 1;
+	    buffer[0] = 'b';
+	    offset = 1;
 	}
     for(int i = length - 1; i >= 0; --i)
 	{
@@ -85,7 +88,7 @@ void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
 	    buffer[offset + i] = n + '0';
 	    if(n > 9)
 		buffer[offset + i] += 7;
-		
+
 	    number /= (uint)formatting;
 	}
 

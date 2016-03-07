@@ -44,3 +44,4 @@ Features:
 
 ### Screenshots
 ![loading](https://raw.githubusercontent.com/darkhunterbg/sos/master/screenshots/loading.JPG)
+![loading](https://raw.githubusercontent.com/darkhunterbg/sos/master/screenshots/bsod.JPG)
