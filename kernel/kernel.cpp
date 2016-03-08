@@ -30,6 +30,8 @@ VGATextSystem* v;
 
 void kmain()
 {
+	
+	
     MemorySystem* memorySystem = reinterpret_cast<MemorySystem*>(MEMORY_MANAGER_ADDRESS);
     memorySystem->Initialize();
     memorySystem->DetectMemory();
@@ -42,16 +44,12 @@ void kmain()
 
     vgaTextSystem->ClearScreen();
 
-    //TestMethod();
-    //vgaTextSystem->PrintText("Welcome to the real kernel!\n");
-
 	cpuSystem->GetPIC().SetExceptionHandler(Interrupt);
+	
+	//asm("sti");
 
-    //cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
 
     DrawGUI(*vgaTextSystem);
-
-    asm("hlt");
 
     delete vgaTextSystem;
     delete cpuSystem;
