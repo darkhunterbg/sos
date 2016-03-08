@@ -21,9 +21,9 @@ using namespace vga;
 using namespace cpu;
 
 static const uint KERNEL_ADDRESS = 0x10'00'00;                                           // 1 MB, up to 14 MB for the kernel
-static const uint MEMORY_MANAGER_ADDRESS = CPUSystem::IDT_ADDRESS + CPUSystem::IDT_SIZE; //16.002 Mb
+static const uint MEMORY_MANAGER_ADDRESS = PIC::IDT_ADDRESS + PIC::IDT_SIZE; //16.002 Mb
 
-void Interrupt(const regs& r);
+void Interrupt(const CPUException& ex);
 void DrawGUI(VGATextSystem&);
 
 VGATextSystem* v;
@@ -35,7 +35,6 @@ void kmain()
     memorySystem->DetectMemory();
 
     CPUSystem* cpuSystem = new CPUSystem();
-    cpuSystem->Initialize();
 
     VGATextSystem* vgaTextSystem = new VGATextSystem();
     vgaTextSystem->SetDriver(new DefaultVGADriver());
@@ -46,7 +45,9 @@ void kmain()
     //TestMethod();
     //vgaTextSystem->PrintText("Welcome to the real kernel!\n");
 
-    cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
+	cpuSystem->GetPIC().SetExceptionHandler(Interrupt);
+
+    //cpuSystem->SetInterruptGate(0x00, (void*)&Interrupt);
 
     DrawGUI(*vgaTextSystem);
 
@@ -58,56 +59,58 @@ void kmain()
     //asm("hlt");
 }
 
-void Interrupt(const regs& r)
+void Interrupt(const CPUException& ex)
 {
     v->GetCursor().foregroundColor = 0x0F;
     v->GetCursor().backgroundColor = 1;
     v->ClearScreen();
     v->PrintText("Something went puff!\n");
 
-    v->PrintText("DivisionByZeroException\n");
+    v->PrintText("Message: ");
+	v->PrintText(ex.exceptionMessage);
+	v->PrintText("\n");
 
     v->PrintText("Interrupt:");
-    v->PrintNumber(r.int_no, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->int_no, NumberFormatting::NF_HEX);
     v->PrintText(" Error Code:");
-    v->PrintNumber(r.int_no, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->int_no, NumberFormatting::NF_HEX);
 
     v->PrintText("\nDS:");
-    v->PrintNumber(r.ds, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->ds, NumberFormatting::NF_HEX);
     v->PrintText(" ES:");
-    v->PrintNumber(r.es, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->es, NumberFormatting::NF_HEX);
     v->PrintText(" FS:");
-    v->PrintNumber(r.fs, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->fs, NumberFormatting::NF_HEX);
     v->PrintText(" GS:");
-    v->PrintNumber(r.gs, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->gs, NumberFormatting::NF_HEX);
 
     v->PrintText("\nEDI:");
-    v->PrintNumber(r.edi, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->edi, NumberFormatting::NF_HEX);
     v->PrintText(" ESI:");
-    v->PrintNumber(r.esi, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->esi, NumberFormatting::NF_HEX);
     v->PrintText(" EBP:");
-    v->PrintNumber(r.ebp, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->ebp, NumberFormatting::NF_HEX);
     v->PrintText(" ESP:");
-    v->PrintNumber(r.esp, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->esp, NumberFormatting::NF_HEX);
     v->PrintText("\nEAX:");
-    v->PrintNumber(r.eax, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->eax, NumberFormatting::NF_HEX);
     v->PrintText(" EBX:");
-    v->PrintNumber(r.ebx, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->ebx, NumberFormatting::NF_HEX);
     v->PrintText(" ECX:");
-    v->PrintNumber(r.ecx, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->ecx, NumberFormatting::NF_HEX);
     v->PrintText(" EDX:");
-    v->PrintNumber(r.edx, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->edx, NumberFormatting::NF_HEX);
 
     v->PrintText("\nEIP:");
-    v->PrintNumber(r.eip, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->eip, NumberFormatting::NF_HEX);
     v->PrintText(" CS:");
-    v->PrintNumber(r.cs, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->cs, NumberFormatting::NF_HEX);
     v->PrintText(" EFLAGS:");
-    v->PrintNumber(r.eflags, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->eflags, NumberFormatting::NF_HEX);
     v->PrintText(" USERESP:");
-    v->PrintNumber(r.useresp, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->useresp, NumberFormatting::NF_HEX);
     v->PrintText(" SS:");
-    v->PrintNumber(r.ss, NumberFormatting::NF_HEX);
+    v->PrintNumber(ex.exceptionData->ss, NumberFormatting::NF_HEX);
 
     while(true);
 	
@@ -159,6 +162,9 @@ void DrawGUI(VGATextSystem& vgaSystem)
 		    ++x;
 		}
 
-	    x /= 0;
+	   // x/=0;
+		byte* addr = (byte*)(0x0010079F) ;
+		
+		addr[0] = 0x34;
 	}
 }

@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=dark_hunter
-Date                   :=08/03/2016
+Date                   :=09/03/2016
 CodeLitePath           :="C:\Program Files\CodeLite"
 LinkerName             :=C:/MinGW/bin/g++.exe
 SharedObjectLinkerName :=C:/MinGW/bin/g++.exe -shared -fPIC
@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) 
 
 
 
@@ -106,7 +106,7 @@ $(IntermediateDirectory)/.d:
 PreBuild:
 	@echo Executing Pre Build commands ...
 	pre.bat
-	'C:\NASM'/nasm -f elf ./cpu/cpu.asm -o ./Debug/cpu_cpu.asm.o
+	'C:\NASM'/nasm -f elf ./cpu/idt.asm -o ./Debug/cpu_idt.asm.o
 	@echo Done
 
 
@@ -152,6 +152,14 @@ $(IntermediateDirectory)/cpu_CPUSystem.cpp$(DependSuffix): cpu/CPUSystem.cpp
 
 $(IntermediateDirectory)/cpu_CPUSystem.cpp$(PreprocessSuffix): cpu/CPUSystem.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(PreprocessSuffix) "cpu/CPUSystem.cpp"
+
+$(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix): cpu/PIC.cpp $(IntermediateDirectory)/cpu_PIC.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/cpu/PIC.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/cpu_PIC.cpp$(DependSuffix): cpu/PIC.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/cpu_PIC.cpp$(DependSuffix) -MM "cpu/PIC.cpp"
+
+$(IntermediateDirectory)/cpu_PIC.cpp$(PreprocessSuffix): cpu/PIC.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_PIC.cpp$(PreprocessSuffix) "cpu/PIC.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

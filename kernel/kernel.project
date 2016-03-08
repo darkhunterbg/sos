@@ -42,9 +42,11 @@
     <File Name="vga/DefaultVGADriver.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="cpu">
-    <File Name="cpu/cpu.asm"/>
     <File Name="cpu/CPUSystem.cpp"/>
     <File Name="cpu/CPUSystem.h"/>
+    <File Name="cpu/PIC.h"/>
+    <File Name="cpu/PIC.cpp"/>
+    <File Name="cpu/idt.asm"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -73,7 +75,7 @@
       </Debugger>
       <PreBuild>
         <Command Enabled="yes">pre.bat</Command>
-        <Command Enabled="yes">$(NASMDir)/nasm -f elf ./cpu/cpu.asm -o ./Debug/cpu_cpu.asm.o</Command>
+        <Command Enabled="yes">$(NASMDir)/nasm -f elf ./cpu/idt.asm -o ./Debug/cpu_idt.asm.o</Command>
       </PreBuild>
       <PostBuild>
         <Command Enabled="yes"/>
