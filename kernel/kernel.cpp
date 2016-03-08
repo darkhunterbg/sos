@@ -60,12 +60,12 @@ void kmain()
 
 void Interrupt(const regs& r)
 {
-	v->GetCursor().foregroundColor = 0x0F;
+    v->GetCursor().foregroundColor = 0x0F;
     v->GetCursor().backgroundColor = 1;
     v->ClearScreen();
     v->PrintText("Something went puff!\n");
 
-   v->PrintText("DivisionByZeroException\n");
+    v->PrintText("DivisionByZeroException\n");
 
     v->PrintText("Interrupt:");
     v->PrintNumber(r.int_no, NumberFormatting::NF_HEX);
@@ -109,7 +109,12 @@ void Interrupt(const regs& r)
     v->PrintText(" SS:");
     v->PrintNumber(r.ss, NumberFormatting::NF_HEX);
 
-    asm("hlt");
+    while(true);
+	
+	//change address in EIP to jmp to kernel entry/ recovering from errr
+	
+	
+    //asm("hlt");
 }
 
 void DrawGUI(VGATextSystem& vgaSystem)

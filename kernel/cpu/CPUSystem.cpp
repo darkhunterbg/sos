@@ -59,4 +59,19 @@ void _fault(regs *r)
 	((Action)intFunction)(*r);
 }
 
+void _trap(regs *r)
+{
+	typedef void(*Action)(const regs&);
+	
+	((Action)intFunction)(*r);
+}
+
+void _abort(regs *r)
+{
+	typedef void(*Action)(const regs&);
+	
+	((Action)intFunction)(*r);
+}
+
+
 }

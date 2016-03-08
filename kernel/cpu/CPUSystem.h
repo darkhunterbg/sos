@@ -44,5 +44,7 @@ struct regs
 };
 
 extern "C" void _fault(regs* r);
+extern "C" void _abort(regs* r);
+extern "C" void _trap(regs* r);
 
 }
