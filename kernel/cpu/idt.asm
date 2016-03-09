@@ -54,6 +54,13 @@ global _isr29
 global _isr30
 global _isr31
 
+global _irq
+
+_irq:
+	cli
+	hlt
+	iret
+
 _isr0:
 	cli
 	push byte 0

@@ -20,18 +20,20 @@ using namespace memory;
 using namespace vga;
 using namespace cpu;
 
-static const uint KERNEL_ADDRESS = 0x10'00'00;                                           // 1 MB, up to 14 MB for the kernel
+static const uint KERNEL_ADDRESS = 0x10'00'00;                               // 1 MB, up to 14 MB for the kernel
 static const uint MEMORY_MANAGER_ADDRESS = PIC::IDT_ADDRESS + PIC::IDT_SIZE; //16.002 Mb
 
+extern "C" void irq();
+
 void Interrupt(const CPUException& ex);
+void IRQHandler();
 void DrawGUI(VGATextSystem&);
 
 VGATextSystem* v;
 
 void kmain()
 {
-	
-	
+
     MemorySystem* memorySystem = reinterpret_cast<MemorySystem*>(MEMORY_MANAGER_ADDRESS);
     memorySystem->Initialize();
     memorySystem->DetectMemory();
@@ -44,17 +46,20 @@ void kmain()
 
     vgaTextSystem->ClearScreen();
 
-	cpuSystem->GetPIC().SetExceptionHandler(Interrupt);
-	
-	//asm("sti");
+    cpuSystem->GetPIC().SetExceptionHandler(Interrupt);
+   // cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
+   // asm("sti");
 
     DrawGUI(*vgaTextSystem);
 
     delete vgaTextSystem;
     delete cpuSystem;
+}
 
-    //asm("hlt");
+void IRQHandler()
+{
+
 }
 
 void Interrupt(const CPUException& ex)
@@ -65,8 +70,8 @@ void Interrupt(const CPUException& ex)
     v->PrintText("Something went puff!\n");
 
     v->PrintText("Message: ");
-	v->PrintText(ex.exceptionMessage);
-	v->PrintText("\n");
+    v->PrintText(ex.exceptionMessage);
+    v->PrintText("\n");
 
     v->PrintText("Interrupt:");
     v->PrintNumber(ex.exceptionData->int_no, NumberFormatting::NF_HEX);
@@ -110,12 +115,10 @@ void Interrupt(const CPUException& ex)
     v->PrintText(" SS:");
     v->PrintNumber(ex.exceptionData->ss, NumberFormatting::NF_HEX);
 
-    while(true);
-	
-	//change address in EIP to jmp to kernel entry/ recovering from errr
-	
-	
-    //asm("hlt");
+    while(true)
+	;
+
+    //change address in EIP to jmp to kernel entry/ recovering from errr
 }
 
 void DrawGUI(VGATextSystem& vgaSystem)
@@ -160,9 +163,6 @@ void DrawGUI(VGATextSystem& vgaSystem)
 		    ++x;
 		}
 
-	   // x/=0;
-		byte* addr = (byte*)(0x0010079F) ;
-		
-		addr[0] = 0x34;
+	     x/=0;
 	}
 }

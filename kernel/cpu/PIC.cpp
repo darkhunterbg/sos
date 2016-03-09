@@ -142,6 +142,13 @@ void PIC::SetExceptionHandler(CPUExceptionHandler handler)
     exceptionHandler = handler;
 }
 
+void PIC::SetIRQHandler(byte gate, InterruptServiceRoutine routine)
+{
+	
+    IDTAttributes attributes = (IDTAttributes)0b10001110;
+	SetInterruptGate(gate,(ushort)GDTSegmentType::GDTST_CODE, attributes, routine);
+}
+
 void _fault(CPUExceptionData* d)
 {
     if(exceptionHandler)

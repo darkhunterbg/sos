@@ -61,6 +61,8 @@ class PIC
 
     void LoadIDT();
 
+	void SetIRQHandler(byte gate, InterruptServiceRoutine routine);
+
     void SetExceptionHandler(CPUExceptionHandler handler);
 };
 
