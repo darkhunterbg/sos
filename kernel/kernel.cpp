@@ -47,9 +47,9 @@ void kmain()
     vgaTextSystem->ClearScreen();
 
     cpuSystem->GetPIC().SetExceptionHandler(Interrupt);
-   // cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
+    //cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
-   // asm("sti");
+    asm("sti");
 
     DrawGUI(*vgaTextSystem);
 
@@ -163,6 +163,6 @@ void DrawGUI(VGATextSystem& vgaSystem)
 		    ++x;
 		}
 
-	     x/=0;
+	     //x/=0;
 	}
 }

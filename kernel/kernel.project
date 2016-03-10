@@ -29,6 +29,8 @@
     <File Name="kernel.cpp"/>
     <File Name="Types.h"/>
     <File Name="cpp.h"/>
+    <File Name="io.asm"/>
+    <File Name="io.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="memory">
     <File Name="memory/MemorySystem.h"/>
@@ -76,6 +78,8 @@
       <PreBuild>
         <Command Enabled="yes">pre.bat</Command>
         <Command Enabled="yes">$(NASMDir)/nasm -f elf ./cpu/idt.asm -o ./Debug/cpu_idt.asm.o</Command>
+        <Command Enabled="yes">$(NASMDir)/nasm -f elf ./io.asm -o ./Debug/io.asm.o</Command>
+        <Command Enabled="yes"/>
       </PreBuild>
       <PostBuild>
         <Command Enabled="yes"/>

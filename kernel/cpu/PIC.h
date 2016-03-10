@@ -4,7 +4,24 @@
 namespace cpu
 {
 
-//enum class GDTSegmentType : ushort;
+enum class PICIOPort : byte
+{
+    PICIO_MASTER_COMMAND = 0x20,
+    PICIO_MASTER_DATA = 0x21,
+
+    PICIO_SLAVE_COMMAND = 0xA0,
+    PICIO_SLAVE_DATA = 0xA1,
+};
+
+enum class PICCommand : byte
+{
+    PICC_ICW4 = 0x01,
+    PICC_SINGLE = 0x02,
+    PICC_INTERVAL4 = 0x04,
+    PICC_LEVE = 0x08,
+    PICC_INITIALIZE = 0x10,
+	PICC_EOF = 0x20,
+};
 
 enum class IDTAttributes : byte
 {
@@ -24,7 +41,7 @@ typedef void (*InterruptServiceRoutine)();
 
 struct CPUExceptionData
 {
-	uint gs, fs, es, ds;                         /* pushed the segs last */
+    uint gs, fs, es, ds;                         /* pushed the segs last */
     uint edi, esi, ebp, esp, ebx, edx, ecx, eax; /* pushed by 'pusha' */
 
     uint int_no, err_code;             /* our 'push byte #' and ecodes do this */
@@ -33,7 +50,7 @@ struct CPUExceptionData
 
 struct CPUException
 {
-	const char* exceptionMessage;
+    const char* exceptionMessage;
     CPUExceptionData* exceptionData;
 };
 
@@ -46,9 +63,14 @@ class PIC
     PIC& operator=(const& CPUSystem) = delete;
 
   private:
+    static const uint MASTER_VECTOR_OFFSET = 0x20;
+    static const uint SLAVE_VECTOR_OFFSET = 0x28;
+
     IDTDescriptor* idtTable;
 
     void SetInterruptGate(byte gate, ushort segment, IDTAttributes attributes, InterruptServiceRoutine routine);
+
+    void Initialize();
 
   public:
     static const uint IDT_ADDRESS = 0x1'00'00'00; //16 MB
@@ -61,9 +83,11 @@ class PIC
 
     void LoadIDT();
 
-	void SetIRQHandler(byte gate, InterruptServiceRoutine routine);
+    void SetIRQHandler(byte gate, InterruptServiceRoutine routine);
 
     void SetExceptionHandler(CPUExceptionHandler handler);
+	
+	void SendEOI(byte irq);
 };
 
 extern "C" void _fault(CPUExceptionData*);

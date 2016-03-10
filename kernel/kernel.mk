@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=dark_hunter
-Date                   :=09/03/2016
+Date                   :=10/03/2016
 CodeLitePath           :="C:\Program Files\CodeLite"
 LinkerName             :=C:/MinGW/bin/g++.exe
 SharedObjectLinkerName :=C:/MinGW/bin/g++.exe -shared -fPIC
@@ -107,6 +107,8 @@ PreBuild:
 	@echo Executing Pre Build commands ...
 	pre.bat
 	'C:\NASM'/nasm -f elf ./cpu/idt.asm -o ./Debug/cpu_idt.asm.o
+	'C:\NASM'/nasm -f elf ./io.asm -o ./Debug/io.asm.o
+	
 	@echo Done
 
 

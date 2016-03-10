@@ -1,1 +1,2 @@
 ./Debug/cpu_idt.asm.o
+./Debug/io.asm.o
