@@ -21,7 +21,7 @@ using namespace vga;
 using namespace cpu;
 
 static const uint KERNEL_ADDRESS = 0x10'00'00;                               // 1 MB, up to 14 MB for the kernel
-static const uint MEMORY_MANAGER_ADDRESS = PIC::IDT_ADDRESS + PIC::IDT_SIZE; //16.002 Mb
+static const uint MEMORY_MANAGER_ADDRESS = CPUInterruptor::IDT_ADDRESS + CPUInterruptor::IDT_SIZE; //16.002 Mb
 
 extern "C" void irq();
 
@@ -46,7 +46,7 @@ void kmain()
 
     vgaTextSystem->ClearScreen();
 
-    cpuSystem->GetPIC().SetExceptionHandler(Interrupt);
+    cpuSystem->GetInterruptor().SetExceptionHandler(Interrupt);
     //cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
     asm("sti");

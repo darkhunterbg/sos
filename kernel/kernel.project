@@ -49,6 +49,8 @@
     <File Name="cpu/PIC.h"/>
     <File Name="cpu/PIC.cpp"/>
     <File Name="cpu/idt.asm"/>
+    <File Name="cpu/CPUInterruptor.h"/>
+    <File Name="cpu/CPUInterruptor.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

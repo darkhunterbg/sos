@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) 
 
 
 
@@ -162,6 +162,14 @@ $(IntermediateDirectory)/cpu_PIC.cpp$(DependSuffix): cpu/PIC.cpp
 
 $(IntermediateDirectory)/cpu_PIC.cpp$(PreprocessSuffix): cpu/PIC.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_PIC.cpp$(PreprocessSuffix) "cpu/PIC.cpp"
+
+$(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix): cpu/CPUInterruptor.cpp $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/cpu/CPUInterruptor.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(DependSuffix): cpu/CPUInterruptor.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(DependSuffix) -MM "cpu/CPUInterruptor.cpp"
+
+$(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(PreprocessSuffix): cpu/CPUInterruptor.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(PreprocessSuffix) "cpu/CPUInterruptor.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

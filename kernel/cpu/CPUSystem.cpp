@@ -5,18 +5,25 @@ namespace cpu
 
 CPUSystem::CPUSystem()
 {
-	pic = new PIC();
-	pic->LoadIDT();
+    interruptor = new CPUInterruptor();
+    interruptor->LoadIDT();
+
+    pic = new PIC();
 }
 
 CPUSystem::~CPUSystem()
 {
-	delete pic;
+    delete pic;
+
+    delete interruptor;
 }
 
 PIC& CPUSystem::GetPIC()
 {
-	return *pic;
+    return *pic;
 }
-
+CPUInterruptor& CPUSystem::GetInterruptor()
+{
+    return *interruptor;
+}
 }

@@ -2,6 +2,7 @@
 
 #include "../Types.h"
 #include "PIC.h"
+#include "CPUInterruptor.h"
 
 namespace cpu
 {
@@ -24,12 +25,14 @@ class CPUSystem
     CPUSystem& operator=(const& CPUSystem) = delete;
 
 	 PIC* pic = nullptr;
+	 CPUInterruptor* interruptor = nullptr;
 
   public:
     CPUSystem();
     ~CPUSystem();
 
     PIC& GetPIC();
+	CPUInterruptor& GetInterruptor();
 };
 
 
