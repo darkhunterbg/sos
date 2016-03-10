@@ -4,24 +4,16 @@ void kmain();
 
 int start()
 {
-
     goto*(void*)&kmain;
     return -1;
 }
 
 #include "cpp.h"
 #include "types.h"
-#include "memory/MemorySystem.h"
-#include "vga/VGATextSystem.h"
+#include "SystemProvider.h"
 #include "vga/DefaultVGADriver.h"
-#include "cpu/CPUSystem.h"
 
-using namespace memory;
-using namespace vga;
-using namespace cpu;
-
-static const uint KERNEL_ADDRESS = 0x10'00'00;                               // 1 MB, up to 14 MB for the kernel
-static const uint MEMORY_MANAGER_ADDRESS = CPUInterruptor::IDT_ADDRESS + CPUInterruptor::IDT_SIZE; //16.002 Mb
+static const uint KERNEL_ADDRESS = 0x10'00'00; // 1 MB, up to 14 MB for the kernel
 
 extern "C" void irq();
 
@@ -34,32 +26,27 @@ VGATextSystem* v;
 void kmain()
 {
 
-    MemorySystem* memorySystem = reinterpret_cast<MemorySystem*>(MEMORY_MANAGER_ADDRESS);
-    memorySystem->Initialize();
-    memorySystem->DetectMemory();
+    SystemProvider* systemProvider = SystemProvider::Create();
 
     CPUSystem* cpuSystem = new CPUSystem();
 
-    VGATextSystem* vgaTextSystem = new VGATextSystem();
-    vgaTextSystem->SetDriver(new DefaultVGADriver());
-    v = vgaTextSystem;
+    systemProvider->GetVGATextSystem()->SetDriver(new DefaultVGADriver());
+    v = systemProvider->GetVGATextSystem();
 
-    vgaTextSystem->ClearScreen();
+    v->ClearScreen();
 
     cpuSystem->GetInterruptor().SetExceptionHandler(Interrupt);
     //cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
     asm("sti");
 
-    DrawGUI(*vgaTextSystem);
+    DrawGUI(*v);
 
-    delete vgaTextSystem;
-    delete cpuSystem;
+    delete systemProvider;
 }
 
 void IRQHandler()
 {
-
 }
 
 void Interrupt(const CPUException& ex)
@@ -163,6 +150,6 @@ void DrawGUI(VGATextSystem& vgaSystem)
 		    ++x;
 		}
 
-	     //x/=0;
+	    //x/=0;
 	}
 }

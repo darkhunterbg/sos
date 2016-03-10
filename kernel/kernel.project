@@ -31,6 +31,8 @@
     <File Name="cpp.h"/>
     <File Name="io.asm"/>
     <File Name="io.h"/>
+    <File Name="SystemProvider.h"/>
+    <File Name="SystemProvider.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="memory">
     <File Name="memory/MemorySystem.h"/>

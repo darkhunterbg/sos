@@ -67,7 +67,7 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) 
 
 
 
@@ -122,6 +122,14 @@ $(IntermediateDirectory)/kernel.cpp$(DependSuffix): kernel.cpp
 
 $(IntermediateDirectory)/kernel.cpp$(PreprocessSuffix): kernel.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/kernel.cpp$(PreprocessSuffix) "kernel.cpp"
+
+$(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix): SystemProvider.cpp $(IntermediateDirectory)/SystemProvider.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/SystemProvider.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/SystemProvider.cpp$(DependSuffix): SystemProvider.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/SystemProvider.cpp$(DependSuffix) -MM "SystemProvider.cpp"
+
+$(IntermediateDirectory)/SystemProvider.cpp$(PreprocessSuffix): SystemProvider.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/SystemProvider.cpp$(PreprocessSuffix) "SystemProvider.cpp"
 
 $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix): memory/MemorySystem.cpp $(IntermediateDirectory)/memory_MemorySystem.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/memory/MemorySystem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IncludePath)
