@@ -26,6 +26,12 @@ void VGATextSystem::ClearScreen()
     cursor.x = cursor.y = 0;
 }
 
+void VGATextSystem::NewLine()
+{
+	cursor.x =0;
+	++cursor.y;
+}
+
 void VGATextSystem::PrintText(const char* text)
 {
     byte color = (cursor.backgroundColor << 4) + cursor.foregroundColor;
@@ -72,7 +78,7 @@ void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
 	    buffer[0] = '0';
 	    buffer[1] = 'x';
 	    offset = 2;
-	    for(int i = 0; i < 8 - length; i++)
+	    for(uint i = 0; i < 8 - length; i++)
 		buffer[2 + i] = '0';
 	    offset += 8 - length;
 	}
@@ -80,6 +86,9 @@ void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
 	{
 	    buffer[0] = 'b';
 	    offset = 1;
+		for(uint i = 0; i < 8 - length; i++)
+		buffer[1 + i] = '0';
+	    offset += 8 - length;
 	}
     for(int i = length - 1; i >= 0; --i)
 	{

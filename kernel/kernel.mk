@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=dark_hunter
-Date                   :=10/03/2016
+Date                   :=14/03/2016
 CodeLitePath           :="C:\Program Files\CodeLite"
 LinkerName             :=C:/MinGW/bin/g++.exe
 SharedObjectLinkerName :=C:/MinGW/bin/g++.exe -shared -fPIC
@@ -67,7 +67,8 @@ SFKDir:='C:\tools'
 NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
-Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) $(IntermediateDirectory)/input_KeyboardSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/input_PS2Controller.cpp$(ObjectSuffix) \
+	
 
 
 
@@ -178,6 +179,22 @@ $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(DependSuffix): cpu/CPUInterrupt
 
 $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(PreprocessSuffix): cpu/CPUInterruptor.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(PreprocessSuffix) "cpu/CPUInterruptor.cpp"
+
+$(IntermediateDirectory)/input_KeyboardSystem.cpp$(ObjectSuffix): input/KeyboardSystem.cpp $(IntermediateDirectory)/input_KeyboardSystem.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/input/KeyboardSystem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/input_KeyboardSystem.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/input_KeyboardSystem.cpp$(DependSuffix): input/KeyboardSystem.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/input_KeyboardSystem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/input_KeyboardSystem.cpp$(DependSuffix) -MM "input/KeyboardSystem.cpp"
+
+$(IntermediateDirectory)/input_KeyboardSystem.cpp$(PreprocessSuffix): input/KeyboardSystem.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/input_KeyboardSystem.cpp$(PreprocessSuffix) "input/KeyboardSystem.cpp"
+
+$(IntermediateDirectory)/input_PS2Controller.cpp$(ObjectSuffix): input/PS2Controller.cpp $(IntermediateDirectory)/input_PS2Controller.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/input/PS2Controller.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/input_PS2Controller.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/input_PS2Controller.cpp$(DependSuffix): input/PS2Controller.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/input_PS2Controller.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/input_PS2Controller.cpp$(DependSuffix) -MM "input/PS2Controller.cpp"
+
+$(IntermediateDirectory)/input_PS2Controller.cpp$(PreprocessSuffix): input/PS2Controller.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/input_PS2Controller.cpp$(PreprocessSuffix) "input/PS2Controller.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

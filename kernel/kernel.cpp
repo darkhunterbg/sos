@@ -12,6 +12,7 @@ int start()
 #include "types.h"
 #include "SystemProvider.h"
 #include "vga/DefaultVGADriver.h"
+#include "io.h"
 
 static const uint KERNEL_ADDRESS = 0x10'00'00; // 1 MB, up to 14 MB for the kernel
 
@@ -28,16 +29,16 @@ void kmain()
 
     SystemProvider* systemProvider = SystemProvider::Create();
 
-    CPUSystem* cpuSystem = new CPUSystem();
-
     systemProvider->GetVGATextSystem()->SetDriver(new DefaultVGADriver());
     v = systemProvider->GetVGATextSystem();
 
     v->ClearScreen();
 
-    cpuSystem->GetInterruptor().SetExceptionHandler(Interrupt);
+    systemProvider->GetCPUSystem()->GetInterruptor().SetExceptionHandler(Interrupt);
     //cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
+    outb(0x21, 0xfd);
+    outb(0xa1, 0xff);
     asm("sti");
 
     DrawGUI(*v);
@@ -134,6 +135,8 @@ void DrawGUI(VGATextSystem& vgaSystem)
 
     while(true)
 	{
+		continue;
+		
 	    uint x = 0;
 	    cursor.foregroundColor = b;
 	    byte c = a;

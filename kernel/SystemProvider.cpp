@@ -1,16 +1,21 @@
 #include "SystemProvider.h"
 
+SystemProvider* SystemProvider::instance = nullptr;
+
 SystemProvider::SystemProvider(MemorySystem* ms)
 {
     this->memorySystem = ms;
-    cpuSystem = new CPUSystem();
+    instance = this;
     vgaTextSystem = new VGATextSystem();
+    cpuSystem = new CPUSystem();
+    keyboardSystem = new KeyboardSystem();
 }
 
 SystemProvider::~SystemProvider()
 {
-    delete vgaTextSystem;
+    delete keyboardSystem;
     delete cpuSystem;
+    delete vgaTextSystem;
 }
 
 SystemProvider* SystemProvider::Create()
@@ -39,4 +44,8 @@ CPUSystem* SystemProvider::GetCPUSystem()
 VGATextSystem* SystemProvider::GetVGATextSystem()
 {
     return vgaTextSystem;
+}
+KeyboardSystem* SystemProvider::GetKeyboardSystem()
+{
+    return keyboardSystem;
 }

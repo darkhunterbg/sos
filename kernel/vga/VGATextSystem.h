@@ -36,6 +36,7 @@ class VGATextSystem
     void SetDriver(IVGADriver* ownDriver);
     IVGADriver* GetDriver();
     void PrintText(const char* text);
+	void NewLine();
 	void PrintNumber(uint number,NumberFormatting formatting =NumberFormatting::NF_DECIMAL);
     void ClearScreen();
 

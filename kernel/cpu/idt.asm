@@ -5,13 +5,17 @@ SECTION .text
 bits 32
 
 extern __fault
+extern __trap
+extern __abort
+
+extern __irq
 
 global _load_idt
 global isr_fault_stub
 
 
 idt:
-	dw 8 * 256 - 1
+	dw 8 * 48 - 1
 	dd 0x1000000
 	
 _load_idt:
@@ -55,6 +59,23 @@ global _isr30
 global _isr31
 
 global _irq
+
+global _irq0
+global _irq1
+global _irq2
+global _irq3
+global _irq4
+global _irq5
+global _irq6
+global _irq7
+global _irq8
+global _irq9
+global _irq10
+global _irq11
+global _irq12
+global _irq13
+global _irq14
+
 
 _irq:
 	cli
@@ -287,7 +308,7 @@ isr_trap_stub:
     mov gs, ax
     mov eax, esp   ; Push us the stack
     push eax
-    mov eax, __fault
+    mov eax, __trap
     call eax       ; A special call, preserves the 'eip' register
     pop eax
     pop gs
@@ -312,7 +333,7 @@ isr_abort_stub:
     mov gs, ax
     mov eax, esp   ; Push us the stack
     push eax
-    mov eax, __fault
+    mov eax, __abort
     call eax       ; A special call, preserves the 'eip' register
     pop eax
     pop gs
@@ -322,3 +343,77 @@ isr_abort_stub:
     popa
     add esp, 8     ; Cleans up the pushed error code and pushed ISR number
     iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
+
+
+irq_stub:
+	mov eax, __irq
+	call eax
+	add esp, 4
+	
+	;mov dx, 0x20
+	;mov al, 0x20
+	;out dx, al
+	
+	iret
+	
+_irq0:
+	push byte 0
+	jmp irq_stub
+	
+_irq1:
+	push byte 1
+	jmp irq_stub
+	
+_irq2:
+	push byte 2
+	jmp irq_stub
+	
+_irq3:
+	push byte 3
+	jmp irq_stub
+	
+_irq4:
+
+	push byte 4
+	jmp irq_stub
+	
+_irq5:
+	push byte 5
+	jmp irq_stub
+	
+_irq6:
+	push byte 6
+	jmp irq_stub
+	
+_irq7:
+	push byte 7
+	jmp irq_stub
+	
+_irq8:
+	push byte 8
+	jmp irq_stub
+	
+_irq9:
+	push byte 9
+	jmp irq_stub
+	
+_irq10:
+	cli
+	push byte 10
+	jmp irq_stub
+	
+_irq11:
+	push byte 11
+	jmp irq_stub
+	
+_irq12:
+	push byte 12
+	jmp irq_stub
+	
+_irq13:
+	push byte 13
+	jmp irq_stub
+	
+_irq14:
+	push byte 14
+	jmp irq_stub

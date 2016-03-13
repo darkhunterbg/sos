@@ -1,6 +1,7 @@
 #include "CPUInterruptor.h"
 #include "CPUSystem.h"
 #include "PIC.h"
+#include "../SystemProvider.h"
 
 extern "C" void load_idt();
 extern "C" void isr0();
@@ -36,10 +37,27 @@ extern "C" void isr29();
 extern "C" void isr30();
 extern "C" void isr31();
 
+extern "C" void irq0();
+extern "C" void irq1();
+extern "C" void irq2();
+extern "C" void irq3();
+extern "C" void irq4();
+extern "C" void irq5();
+extern "C" void irq6();
+extern "C" void irq7();
+extern "C" void irq8();
+extern "C" void irq9();
+extern "C" void irq10();
+extern "C" void irq11();
+extern "C" void irq12();
+extern "C" void irq13();
+extern "C" void irq14();
+
 namespace cpu
 {
 
 CPUExceptionHandler exceptionHandler = nullptr;
+
 const char* exceptionsMessages[] =
     {
         "Divided By Zero",
@@ -78,12 +96,10 @@ const char* exceptionsMessages[] =
 
 CPUInterruptor::CPUInterruptor()
 {
-	
 }
 
 CPUInterruptor::~CPUInterruptor()
 {
-	
 }
 
 void CPUInterruptor::LoadIDT()
@@ -125,13 +141,29 @@ void CPUInterruptor::LoadIDT()
     SetInterruptGate(30, (ushort)GDTSegmentType::GDTST_CODE, attributes, isr30);
     SetInterruptGate(31, (ushort)GDTSegmentType::GDTST_CODE, attributes, isr31);
 
+    SetInterruptGate(0 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq0);
+    SetInterruptGate(1 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq1);
+    SetInterruptGate(2 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq2);
+    SetInterruptGate(3 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq3);
+    SetInterruptGate(4 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq4);
+    SetInterruptGate(5 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq5);
+    SetInterruptGate(6 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq6);
+    SetInterruptGate(7 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq7);
+    SetInterruptGate(8 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq8);
+    SetInterruptGate(9 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq9);
+    SetInterruptGate(10 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq10);
+    SetInterruptGate(11 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq11);
+    SetInterruptGate(12 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq12);
+    SetInterruptGate(13 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq13);
+    SetInterruptGate(14 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq14);
+
     load_idt();
 }
 
-void CPUInterruptor::SetInterruptGate(byte irq, ushort segment, IDTAttributes attributes, InterruptServiceRoutine routine)
+void CPUInterruptor::SetInterruptGate(byte gate, ushort segment, IDTAttributes attributes, InterruptServiceRoutine routine)
 {
 
-    idtTable[irq + PIC::MASTER_VECTOR_OFFSET] = {
+    idtTable[gate] = {
         (ushort)(((uint)routine) & 0xFFFF),
         segment,
         0,
@@ -144,11 +176,11 @@ void CPUInterruptor::SetExceptionHandler(CPUExceptionHandler handler)
 {
     exceptionHandler = handler;
 }
-void CPUInterruptor::SetIRQHandler(byte gate, InterruptServiceRoutine routine)
+void CPUInterruptor::SetIRQHandler(byte i, InterruptServiceRoutine routine)
 {
 
     IDTAttributes attributes = (IDTAttributes)0b10001110;
-    SetInterruptGate(gate, (ushort)GDTSegmentType::GDTST_CODE, attributes, routine);
+    SetInterruptGate(i + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, routine);
 }
 
 void _fault(CPUExceptionData* d)
@@ -184,4 +216,18 @@ void _abort(CPUExceptionData* d)
 	asm("hlt");
 }
 
+#include "../io.h"
+
+void _irq(uint irq)
+{
+
+    byte b = inb(0x60);
+
+    SystemProvider::instance->GetVGATextSystem()->PrintNumber(b);
+	SystemProvider::instance->GetVGATextSystem()->PrintText(" ");
+
+    SystemProvider::instance->GetCPUSystem()->GetPIC().SendEOI(irq);
+
+    //asm("hlt");
+}
 }

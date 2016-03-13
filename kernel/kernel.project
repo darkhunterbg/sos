@@ -155,4 +155,10 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="input">
+    <File Name="input/KeyboardSystem.h"/>
+    <File Name="input/KeyboardSystem.cpp"/>
+    <File Name="input/PS2Controller.h"/>
+    <File Name="input/PS2Controller.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>

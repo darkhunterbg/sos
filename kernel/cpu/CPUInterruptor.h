@@ -49,7 +49,7 @@ class CPUInterruptor
 
   public:
     static const uint IDT_ADDRESS = 0x1'00'00'00; //16 MB
-    static const uint IDT_COUNT = 256;
+    static const uint IDT_COUNT = 48;
     static const uint IDT_SIZE = IDT_COUNT * sizeof(IDTDescriptor);
     static const uint EXCEPTIONS_COUNT = 32;
 
@@ -64,4 +64,5 @@ class CPUInterruptor
 extern "C" void _fault(CPUExceptionData*);
 extern "C" void _abort(CPUExceptionData*);
 extern "C" void _trap(CPUExceptionData*);
+extern "C" void _irq(uint irq);
 }
