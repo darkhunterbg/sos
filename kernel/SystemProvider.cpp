@@ -9,10 +9,12 @@ SystemProvider::SystemProvider(MemorySystem* ms)
     vgaTextSystem = new VGATextSystem();
     cpuSystem = new CPUSystem();
     keyboardSystem = new KeyboardSystem();
+	fileSystem = new FileSystem();
 }
 
 SystemProvider::~SystemProvider()
 {
+	delete fileSystem;
     delete keyboardSystem;
     delete cpuSystem;
     delete vgaTextSystem;
@@ -48,4 +50,9 @@ VGATextSystem* SystemProvider::GetVGATextSystem()
 KeyboardSystem* SystemProvider::GetKeyboardSystem()
 {
     return keyboardSystem;
+}
+
+FileSystem* SystemProvider::GetFileSystem()
+{
+    return fileSystem;
 }

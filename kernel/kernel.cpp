@@ -39,8 +39,22 @@ void kmain()
 
     systemProvider->GetCPUSystem()->EnableInterrupts();
 
+
+     byte* buffer = new byte[512 * 9];
+    bool read = systemProvider->GetFileSystem()->GetATAController().Read(8200, 9, buffer);
+    if(read)
+	{
+		systemProvider->GetVGATextSystem()->PrintText("SUCCESS\n");
+	    for(int i = 512*8; i < 512 * 9; ++i)
+		{
+		    systemProvider->GetVGATextSystem()->PrintChar(buffer[i]);
+		}
+	}
+    else
+		systemProvider->GetVGATextSystem()->PrintText("FAILED");
+	systemProvider->GetCPUSystem()->Halt();
     //TextInput();
-    DrawGUI();
+    //DrawGUI();
 
     delete systemProvider;
 }

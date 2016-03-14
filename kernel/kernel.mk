@@ -68,7 +68,7 @@ NASMDir:='C:\NASM'
 OSFMountDir:='C:\Program Files\OSFMount'
 DiskMountPoint:=I:
 Objects0=$(IntermediateDirectory)/kernel.cpp$(ObjectSuffix) $(IntermediateDirectory)/SystemProvider.cpp$(ObjectSuffix) $(IntermediateDirectory)/memory_MemorySystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_VGATextSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/vga_DefaultVGADriver.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_PIC.cpp$(ObjectSuffix) $(IntermediateDirectory)/cpu_CPUInterruptor.cpp$(ObjectSuffix) $(IntermediateDirectory)/input_KeyboardSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/input_PS2Controller.cpp$(ObjectSuffix) \
-	
+	$(IntermediateDirectory)/fs_FileSystem.cpp$(ObjectSuffix) $(IntermediateDirectory)/fs_ATAController.cpp$(ObjectSuffix) 
 
 
 
@@ -195,6 +195,22 @@ $(IntermediateDirectory)/input_PS2Controller.cpp$(DependSuffix): input/PS2Contro
 
 $(IntermediateDirectory)/input_PS2Controller.cpp$(PreprocessSuffix): input/PS2Controller.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/input_PS2Controller.cpp$(PreprocessSuffix) "input/PS2Controller.cpp"
+
+$(IntermediateDirectory)/fs_FileSystem.cpp$(ObjectSuffix): fs/FileSystem.cpp $(IntermediateDirectory)/fs_FileSystem.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/fs/FileSystem.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/fs_FileSystem.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/fs_FileSystem.cpp$(DependSuffix): fs/FileSystem.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/fs_FileSystem.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/fs_FileSystem.cpp$(DependSuffix) -MM "fs/FileSystem.cpp"
+
+$(IntermediateDirectory)/fs_FileSystem.cpp$(PreprocessSuffix): fs/FileSystem.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/fs_FileSystem.cpp$(PreprocessSuffix) "fs/FileSystem.cpp"
+
+$(IntermediateDirectory)/fs_ATAController.cpp$(ObjectSuffix): fs/ATAController.cpp $(IntermediateDirectory)/fs_ATAController.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "D:/SOS/sos/kernel/fs/ATAController.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/fs_ATAController.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/fs_ATAController.cpp$(DependSuffix): fs/ATAController.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/fs_ATAController.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/fs_ATAController.cpp$(DependSuffix) -MM "fs/ATAController.cpp"
+
+$(IntermediateDirectory)/fs_ATAController.cpp$(PreprocessSuffix): fs/ATAController.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/fs_ATAController.cpp$(PreprocessSuffix) "fs/ATAController.cpp"
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

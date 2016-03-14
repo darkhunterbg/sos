@@ -161,4 +161,10 @@
     <File Name="input/PS2Controller.h"/>
     <File Name="input/PS2Controller.cpp"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="fs">
+    <File Name="fs/FileSystem.h"/>
+    <File Name="fs/FileSystem.cpp"/>
+    <File Name="fs/ATAController.h"/>
+    <File Name="fs/ATAController.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>
