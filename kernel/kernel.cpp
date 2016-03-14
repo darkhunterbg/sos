@@ -19,8 +19,8 @@ static const uint KERNEL_ADDRESS = 0x10'00'00; // 1 MB, up to 14 MB for the kern
 extern "C" void irq();
 
 void Interrupt(const CPUException& ex);
-void IRQHandler();
-void DrawGUI(VGATextSystem&);
+void DrawGUI();
+void TextInput();
 
 VGATextSystem* v;
 
@@ -37,15 +37,12 @@ void kmain()
     systemProvider->GetCPUSystem()->GetInterruptor().SetExceptionHandler(Interrupt);
     //cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
-    asm("sti");
+    systemProvider->GetCPUSystem()->EnableInterrupts();
 
-    DrawGUI(*v);
+    //TextInput();
+    DrawGUI();
 
     delete systemProvider;
-}
-
-void IRQHandler()
-{
 }
 
 void Interrupt(const CPUException& ex)
@@ -107,8 +104,35 @@ void Interrupt(const CPUException& ex)
     //change address in EIP to jmp to kernel entry/ recovering from errr
 }
 
-void DrawGUI(VGATextSystem& vgaSystem)
+void TextInput()
 {
+    SystemProvider* systemProvider = SystemProvider::instance;
+
+    char c;
+    while(true)
+	{
+	    if(systemProvider->GetKeyboardSystem()->PoolInput(c))
+		{
+		    if(c == BACKSPACE)
+			{
+			    systemProvider->GetVGATextSystem()->DeleteLastChar();
+			}
+		    else
+			systemProvider->GetVGATextSystem()->PrintChar(c);
+		}
+	    else
+		{
+		    systemProvider->GetCPUSystem()->Halt();
+		}
+	}
+}
+
+void DrawGUI()
+{
+    SystemProvider* systemProvider = SystemProvider::instance;
+
+    VGATextSystem& vgaSystem = *systemProvider->GetVGATextSystem();
+
     Cursor& cursor = vgaSystem.GetCursor();
 
     cursor.foregroundColor = 0x07;
@@ -133,8 +157,6 @@ void DrawGUI(VGATextSystem& vgaSystem)
 
     while(true)
 	{
-		continue;
-		
 	    uint x = 0;
 	    cursor.foregroundColor = b;
 	    byte c = a;

@@ -26,10 +26,35 @@ void VGATextSystem::ClearScreen()
     cursor.x = cursor.y = 0;
 }
 
+void VGATextSystem::DeleteLastChar()
+{
+	if(cursor.x== 0)
+	{
+		if(cursor.y==0)
+			return;
+		
+		cursor.x = driver->GetParameters().textColumns - 1;
+		--cursor.y;
+	}
+	else
+		--cursor.x;
+	PrintChar(' ');
+	
+	if(cursor.x== 0)
+	{
+		cursor.x = driver->GetParameters().textColumns - 1;
+		--cursor.y;
+	}
+	else
+		--cursor.x;
+	
+	
+}
+
 void VGATextSystem::NewLine()
 {
-	cursor.x =0;
-	++cursor.y;
+    cursor.x = 0;
+    ++cursor.y;
 }
 
 void VGATextSystem::PrintText(const char* text)
@@ -56,6 +81,27 @@ void VGATextSystem::PrintText(const char* text)
 			}
 		}
 	    ++text;
+	}
+}
+void VGATextSystem::PrintChar(char c)
+{
+    byte color = (cursor.backgroundColor << 4) + cursor.foregroundColor;
+    const VGAParameters params = driver->GetParameters();
+
+    if(c == '\n' || c == '\r')
+	{
+	    cursor.x = 0;
+	    ++cursor.y;
+	}
+    else
+	{
+	    driver->Print(c, cursor.x, cursor.y, color);
+	    ++cursor.x;
+	    if(cursor.x == params.textColumns)
+		{
+		    cursor.x = 0;
+		    ++cursor.y;
+		}
 	}
 }
 void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
@@ -86,7 +132,7 @@ void VGATextSystem::PrintNumber(uint number, NumberFormatting formatting)
 	{
 	    buffer[0] = 'b';
 	    offset = 1;
-		for(uint i = 0; i < 8 - length; i++)
+	    for(uint i = 0; i < 8 - length; i++)
 		buffer[1 + i] = '0';
 	    offset += 8 - length;
 	}

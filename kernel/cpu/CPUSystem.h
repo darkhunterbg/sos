@@ -33,6 +33,9 @@ class CPUSystem
 
     PIC& GetPIC();
 	CPUInterruptor& GetInterruptor();
+	
+	void Halt();
+	void EnableInterrupts();
 };
 
 
