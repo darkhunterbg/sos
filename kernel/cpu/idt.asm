@@ -75,6 +75,7 @@ global _irq11
 global _irq12
 global _irq13
 global _irq14
+global _irq15
 
 
 _irq:
@@ -417,3 +418,8 @@ _irq13:
 _irq14:
 	push byte 14
 	jmp irq_stub
+	
+_irq15:
+	push byte 15
+	jmp irq_stub
+

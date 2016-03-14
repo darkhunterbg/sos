@@ -52,11 +52,13 @@ extern "C" void irq11();
 extern "C" void irq12();
 extern "C" void irq13();
 extern "C" void irq14();
+extern "C" void irq15();
 
 namespace cpu
 {
 
 CPUExceptionHandler exceptionHandler = nullptr;
+IRQHandler* irqHandlers = nullptr;
 
 const char* exceptionsMessages[] =
     {
@@ -96,10 +98,12 @@ const char* exceptionsMessages[] =
 
 CPUInterruptor::CPUInterruptor()
 {
+    irqHandlers = new IRQHandler[16];
 }
 
 CPUInterruptor::~CPUInterruptor()
 {
+    delete[] irqHandlers;
 }
 
 void CPUInterruptor::LoadIDT()
@@ -156,6 +160,7 @@ void CPUInterruptor::LoadIDT()
     SetInterruptGate(12 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq12);
     SetInterruptGate(13 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq13);
     SetInterruptGate(14 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq14);
+    SetInterruptGate(15 + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, irq15);
 
     load_idt();
 }
@@ -176,11 +181,10 @@ void CPUInterruptor::SetExceptionHandler(CPUExceptionHandler handler)
 {
     exceptionHandler = handler;
 }
-void CPUInterruptor::SetIRQHandler(byte i, InterruptServiceRoutine routine)
+void CPUInterruptor::SetIRQHandler(IRQType i, IRQHandler routine)
 {
 
-    IDTAttributes attributes = (IDTAttributes)0b10001110;
-    SetInterruptGate(i + PIC::MASTER_VECTOR_OFFSET, (ushort)GDTSegmentType::GDTST_CODE, attributes, routine);
+	irqHandlers[(byte)i] = routine;
 }
 
 void _fault(CPUExceptionData* d)
@@ -216,18 +220,15 @@ void _abort(CPUExceptionData* d)
 	asm("hlt");
 }
 
-#include "../io.h"
-
 void _irq(uint irq)
 {
 
-    byte b = inb(0x60);
-
-    SystemProvider::instance->GetVGATextSystem()->PrintNumber(b);
-	SystemProvider::instance->GetVGATextSystem()->PrintText(" ");
-
-    SystemProvider::instance->GetCPUSystem()->GetPIC().SendEOI(irq);
-
-    //asm("hlt");
+	IRQHandler handler = irqHandlers[irq];
+	if(handler != nullptr)
+	{
+		handler(*SystemProvider::instance);
+	}
+	else
+	    asm("hlt");
 }
 }

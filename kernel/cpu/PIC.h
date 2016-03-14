@@ -4,6 +4,22 @@
 namespace cpu
 {
 
+enum class IRQType : byte
+{
+	IRQT_PIT = 0,
+	IRQT_KEYBOARD = 1,
+	IRQT_COM2 = 3,
+	IRQT_COM1 = 4,
+	IRQT_LPT2 = 5,
+	IRQT_FLOPPY = 6,
+	IRQT_LPT1 = 7,
+	IRQT_CMOS_CLOCK = 8,
+	IRQT_MOUSE = 12,
+	IRQT_FPU = 13,
+	IRQT_ATA_PRIMARY = 14,
+	IRQT_ATA_SECONDARY = 15,
+};
+	
 enum class PICIOPort : byte
 {
     PICIO_MASTER_COMMAND = 0x20,
@@ -29,6 +45,7 @@ class PIC
     PIC(const& PIC) = delete;
     PIC& operator=(const& PIC) = delete;
 
+
   private:
     void Initialize();
 
@@ -39,6 +56,6 @@ class PIC
     PIC();
     ~PIC();
 
-    void SendEOI(byte irq);
+    void SendEOI(IRQType irq);
 };
 }

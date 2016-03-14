@@ -41,11 +41,16 @@ void PIC::Initialize()
     //Restore masks
     outb((byte)PICIOPort::PICIO_MASTER_DATA, a1);
     outb((byte)PICIOPort::PICIO_SLAVE_DATA, a2);
+	
+	
+	//Set IRQ mask
+    outb((byte)PICIOPort::PICIO_MASTER_DATA, 0xfd);
+    outb((byte)PICIOPort::PICIO_SLAVE_DATA, 0xff);
 }
 
-void PIC::SendEOI(byte irq)
+void PIC::SendEOI(IRQType irq)
 {
-    if(irq >= 8)
+    if((byte)irq >= 8)
 	outb((byte)PICIOPort::PICIO_SLAVE_COMMAND, (byte)PICCommand::PICC_EOI);
 
     outb((byte)PICIOPort::PICIO_MASTER_COMMAND, (byte)PICCommand::PICC_EOI);

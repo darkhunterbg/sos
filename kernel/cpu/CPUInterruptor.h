@@ -1,6 +1,8 @@
 #pragma once
 #include "../Types.h"
 
+class SystemProvider;
+
 namespace cpu
 {
 
@@ -8,6 +10,8 @@ enum class IDTAttributes : byte
 {
 
 };
+
+enum class IRQType :byte;
 
 struct IDTDescriptor
 {
@@ -19,6 +23,7 @@ struct IDTDescriptor
 } __attribute__((packed));
 
 typedef void (*InterruptServiceRoutine)();
+typedef void (*IRQHandler)(SystemProvider& systemProvider);
 
 struct CPUExceptionData
 {
@@ -58,7 +63,7 @@ class CPUInterruptor
 
     void LoadIDT();
     void SetExceptionHandler(CPUExceptionHandler handler);
-    void SetIRQHandler(byte irq, InterruptServiceRoutine routine);
+    void SetIRQHandler(IRQType irq, IRQHandler handler);
 };
 
 extern "C" void _fault(CPUExceptionData*);

@@ -2,6 +2,8 @@
 #include "../Types.h"
 #include "PS2Controller.h"
 
+class SystemProvider;
+
 namespace input
 {
 class KeyboardSystem
@@ -12,10 +14,14 @@ class KeyboardSystem
   private:
     PS2Controller* ps2Controller = nullptr;
 
+	static void KeyboardIRQ(SystemProvider& provider);
+
   public:
     KeyboardSystem();
     ~KeyboardSystem();
 	
 	PS2Controller* GetPS2Controller();
 };
+
+
 }

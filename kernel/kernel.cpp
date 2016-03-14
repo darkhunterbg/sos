@@ -37,8 +37,6 @@ void kmain()
     systemProvider->GetCPUSystem()->GetInterruptor().SetExceptionHandler(Interrupt);
     //cpuSystem->GetPIC().SetIRQHandler(0x77, irq);
 
-    outb(0x21, 0xfd);
-    outb(0xa1, 0xff);
     asm("sti");
 
     DrawGUI(*v);
