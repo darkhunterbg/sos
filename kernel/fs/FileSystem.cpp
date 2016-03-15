@@ -40,6 +40,7 @@ FileSystem::FileSystem()
 
     fatStartSector = bootRecord.reservedSectorsCount;
     rootStartSector = fatStartSector + extendedRecord.sectorsPerFAT * bootRecord.fatCount;
+    clusterIdOffset = extendedRecord.fileSystemInfoSector + 1;
 }
 
 FileSystem::~FileSystem()
@@ -54,10 +55,10 @@ ATAController& FileSystem::GetATAController()
 
 FSID FileSystem::GetFATNextCluster(FSID cluster)
 {
-    if(cluster < 0)
+    if(cluster < clusterIdOffset)
 	return -1;
 
-    uint fatOffset = (cluster + extendedRecord.fileSystemInfoSector + 1) * 4;
+    uint fatOffset = (cluster - clusterIdOffset + extendedRecord.fileSystemInfoSector + 1) * 4;
     uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
     uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE);
 
@@ -69,18 +70,29 @@ FSID FileSystem::GetFATNextCluster(FSID cluster)
     //remember to ignore the high 4 bits.
     uint tableValue = *(uint*)(buffer + entryOffset) & 0x0FFFFFFF;
 
-    if(tableValue < extendedRecord.fileSystemInfoSector + 1 || tableValue == (uint)0x0FFFFFFF)
+    if(tableValue == 0 || tableValue == (uint)0x0FFFFFFF)
 	return -1;
 
-    return (FSID)(tableValue - extendedRecord.fileSystemInfoSector - 1);
+    return tableValue;
 }
 
-FSID FileSystem::SearchDir(FSID currentDir, const char* name, uint nameLength, const char* ext, bool isDir)
+FSEntry FileSystem::GetRoot()
 {
+    FSEntry result;
+
+    result.id = 2;
+    utils::StringCopy("/", result.name, 2);
+	result.isDirectory = true;
+	result.size = 0;
+
+    return result;
 }
 
-uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
+uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 {
+    if(!dir.isDirectory)
+	return 0;
+
     byte buffer[ATAController::SECTOR_SIZE];
     uint sector = 0;
 
@@ -93,9 +105,11 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 
     bool done = false;
 
+    FSID cluster = dir.id;
+
     while(!done)
 	{
-	    sector = dir * CLUSTER_SIZE + rootStartSector;
+	    sector = (cluster - clusterIdOffset) * CLUSTER_SIZE + rootStartSector;
 
 	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 		{
@@ -186,7 +200,6 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 			    FSEntry entry;
 
 			    entry.id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
-			    entry.id -= extendedRecord.fileSystemInfoSector + 1;
 			    entry.isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
 			    entry.size = obj.size;
 
@@ -229,7 +242,7 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 
 	    if(!done)
 		{
-		    dir = GetFATNextCluster(dir);
+		    cluster = GetFATNextCluster(cluster);
 		}
 	}
 

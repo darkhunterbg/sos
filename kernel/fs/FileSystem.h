@@ -114,20 +114,20 @@ class FileSystem
 	ATAController* ataController = nullptr;
 	uint fatStartSector;
 	uint rootStartSector;
+	uint clusterIdOffset;
 	
 	
 	FAT32BootRecord bootRecord;
     FAT32ExtendedBootRecord extendedRecord;
 
 	FSID GetFATNextCluster(FSID cluster);
-	FSID SearchDir(FSID currentDir, const char* name, uint nameLength, const char* ext, bool isDir);
 	
 	public :
 	FileSystem();
 	~FileSystem();
 	
-	uint GetEntries(FSID dir, FSEntry* buffer, uint bufferSize);
-
+	uint GetEntries(FSEntry dir, FSEntry* buffer, uint bufferSize);
+	FSEntry GetRoot();
 	
 	
 	ATAController& GetATAController();

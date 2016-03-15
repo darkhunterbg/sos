@@ -41,7 +41,10 @@ void kmain()
 
 
     FSEntry buffer[32];
-    uint size = systemProvider->GetFileSystem()->GetEntries(0, buffer, 32);
+	
+	FSEntry root = systemProvider->GetFileSystem()->GetRoot();
+	
+    uint size = systemProvider->GetFileSystem()->GetEntries(root, buffer, 32);
 
     systemProvider->GetVGATextSystem()->PrintNumber(size);
     systemProvider->GetVGATextSystem()->PrintChar('\n');
@@ -49,9 +52,11 @@ void kmain()
     for(int i = 0; i < size; ++i)
 	{
 	    systemProvider->GetVGATextSystem()->PrintText(buffer[i].name);
-	    systemProvider->GetVGATextSystem()->PrintChar(' ');
+	    systemProvider->GetVGATextSystem()->PrintText(" ID:");
 	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].id);
-	    systemProvider->GetVGATextSystem()->PrintChar('\n');
+	    systemProvider->GetVGATextSystem()->PrintText(" Size:");
+		systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].size);
+	    systemProvider->GetVGATextSystem()->NewLine();
 	}
     systemProvider->GetCPUSystem()->Halt();
     //TextInput();
