@@ -86,6 +86,11 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 
     uint result = 0;
 
+    char lfn[256];
+    lfn[0] = 0;
+
+    uint lfnOffset = 255;
+
     for(uint i = 0; i < CLUSTER_SIZE; ++i)
 	{
 
@@ -114,22 +119,61 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 			}
 		    if(buffer[j + 11] == (byte)FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
 			{
-				//SystemProvider::instance->GetVGATextSystem()->PrintText("LFN\n");
-				
+			    FAT32LongFileEntry& lfnObj = *reinterpret_cast<FAT32LongFileEntry*>(buffer + j);
+
+			    char tmp[13];
+
+			    int n = 0;
+
+			    for(int k = 0; k < 10; k += 2)
+				{
+				    if((byte)lfnObj.firstChar[k] == 0xFF)
+					break;
+
+				    tmp[n] = lfnObj.firstChar[k];
+				    ++n;
+				}
+			    for(int k = 0; k < 12; k += 2)
+				{
+				    if((byte)lfnObj.secondChar[k] == 0xFF)
+					break;
+
+				    tmp[n] = lfnObj.secondChar[k];
+				    ++n;
+				}
+			    for(int k = 0; k < 4; k += 2)
+				{
+				    if((byte)lfnObj.thirdChar[k] == 0xFF)
+					break;
+
+				    tmp[n] = lfnObj.thirdChar[k];
+				    ++n;
+				}
+
+			    tmp[n] = 0;
+
+			    utils::Copy(tmp, lfn + lfnOffset - n, n);
+			    lfn[255] = 0;
+			    lfnOffset -= n;
+
+			    //Only 6 bits are for order
+			    // SystemProvider::instance->GetVGATextSystem()->PrintText(lfn + lfnOffset);
+			    //SystemProvider::instance->GetVGATextSystem()->PrintChar(' ');
+			    // SystemProvider::instance->GetVGATextSystem()->PrintText(tmp);
+			    //SystemProvider::instance->GetVGATextSystem()->NewLine();
+
 			    continue;
 			}
 
-
 		    FAT32Object& obj = *reinterpret_cast<FAT32Object*>(buffer + j);
-			
-			
+
 		    if(!(byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
 			{
 			    //Deleted
 			    continue;
 			}
 
-			 if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_VOLUME_ID)
+		    if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_VOLUME_ID)
 			{
 			    //System
 			    continue;
@@ -138,11 +182,32 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 		    entries[result].id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
 		    entries[result].isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
 		    entries[result].size = obj.size;
-		    uint length = utils::StringCopy(obj.name, entries[result].name, 11);
-		  //  entries[result].name[length + 1] = '.';
-		  //  utils::StringCopy(obj.name, entries[result].name + length + 1, 3);
-			
-			++result;
+
+		    //SystemProvider::instance->GetVGATextSystem()->PrintText(lfn);
+		    //SystemProvider::instance->GetVGATextSystem()->NewLine();
+
+		    if(lfnOffset == 255)
+			{
+			    int index = utils::FindChar(obj.name, ' ', 11);
+
+			    utils::StringAppend(obj.name, entries[result].name, index, 256);
+			    if(!entries[result].isDirectory)
+				{
+				    utils::StringAppend(".", entries[result].name, 1, 256);
+				    index = utils::FindChar(obj.name + 8, ' ', 3);
+				    if(index < 0)
+					index = 0;
+				    utils::StringAppend(obj.name + index + 8, entries[result].name, 3, 256);
+				}
+			}
+		    else
+			{
+			    utils::StringAppend(lfn + lfnOffset, entries[result].name, 256, 256);
+			    lfn[0] = 0;
+			    lfnOffset = 255;
+			}
+
+		    ++result;
 		}
 
 	    if(done)

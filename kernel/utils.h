@@ -20,13 +20,39 @@ uint StringCopy(const char* s, char* d, uint size)
 	{
 	    d[i] = s[i];
 	    if(s[i] == 0)
-			return i ;
+		return i;
 	}
-	
-	d[size] = 0;
-	
-	return size;
+
+    d[size] = 0;
+
+    return size;
 }
+
+
+uint StringAppend(const char* s, char* d, uint sSize, uint dSize)
+{
+    for(uint i = 0; i < dSize; ++i)
+	{
+	    if(d[i] == 0)
+		{
+		    return i + StringCopy(s, d + i, sSize);
+		}
+	}
+    return dSize;
+}
+
+int FindChar(const char* s, char c, uint sSize)
+{
+    for(uint i = 0; i < sSize; ++i)
+	{
+	    if(s[i] == c)
+		{
+		    return i;
+		}
+	}
+    return -1;
+}
+
 bool Compare(const void* a, const void* b, uint count)
 {
     for(uint i = 0; i < count; ++i)
