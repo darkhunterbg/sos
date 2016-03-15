@@ -82,7 +82,7 @@ FSID FileSystem::SearchDir(FSID currentDir, const char* name, uint nameLength, c
 uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 {
     byte buffer[ATAController::SECTOR_SIZE];
-    uint sector = dir * CLUSTER_SIZE + rootStartSector;
+    uint sector = 0;
 
     uint result = 0;
 
@@ -91,127 +91,138 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 
     uint lfnOffset = 255;
 
-    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+    bool done = false;
+
+    while(!done)
 	{
-
-	    ataController->Read(sector + i, 1, buffer);
-
-	    bool done = false;
-
-	    for(uint j = 0; j < ATAController::SECTOR_SIZE; j += sizeof(FAT32Object))
+		sector = dir * CLUSTER_SIZE + rootStartSector;
+		
+	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 		{
-		    if(result == maxEntries - 1)
-			{
-			    done = true;
-			    break;
-			}
 
-		    if(buffer[j] == 0)
-			{
-			    //No mo entries
-			    done = true;
-			    break;
-			}
-		    if(buffer[j] == 0xE5)
-			{
-			    //Unused
-			    continue;
-			}
-		    if(buffer[j + 11] == (byte)FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
-			{
-			    FAT32LongFileEntry& lfnObj = *reinterpret_cast<FAT32LongFileEntry*>(buffer + j);
+		    ataController->Read(sector + i, 1, buffer);
 
-			    char tmp[13];
-
-			    int n = 0;
-
-			    for(int k = 0; k < 10; k += 2)
+		    for(uint j = 0; j < ATAController::SECTOR_SIZE; j += sizeof(FAT32Object))
+			{
+			    if(result == maxEntries - 1)
 				{
-				    if((byte)lfnObj.firstChar[k] == 0xFF)
-					break;
-
-				    tmp[n] = lfnObj.firstChar[k];
-				    ++n;
-				}
-			    for(int k = 0; k < 12; k += 2)
-				{
-				    if((byte)lfnObj.secondChar[k] == 0xFF)
-					break;
-
-				    tmp[n] = lfnObj.secondChar[k];
-				    ++n;
-				}
-			    for(int k = 0; k < 4; k += 2)
-				{
-				    if((byte)lfnObj.thirdChar[k] == 0xFF)
-					break;
-
-				    tmp[n] = lfnObj.thirdChar[k];
-				    ++n;
+				    done = true;
+				    break;
 				}
 
-			    tmp[n] = 0;
+			    if(buffer[j] == 0)
+				{
+				    //No mo entries
+				    done = true;
+				    break;
+				}
+			    if(buffer[j] == 0xE5)
+				{
+				    //Unused
+				    continue;
+				}
+			    if(buffer[j + 11] == (byte)FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
+				{
+				    FAT32LongFileEntry& lfnObj = *reinterpret_cast<FAT32LongFileEntry*>(buffer + j);
 
-			    utils::Copy(tmp, lfn + lfnOffset - n, n);
-			    lfn[255] = 0;
-			    lfnOffset -= n;
+				    char tmp[13];
 
-			    //Only 6 bits are for order
-			    // SystemProvider::instance->GetVGATextSystem()->PrintText(lfn + lfnOffset);
-			    //SystemProvider::instance->GetVGATextSystem()->PrintChar(' ');
-			    // SystemProvider::instance->GetVGATextSystem()->PrintText(tmp);
+				    int n = 0;
+
+				    for(int k = 0; k < 10; k += 2)
+					{
+					    if((byte)lfnObj.firstChar[k] == 0xFF)
+						break;
+
+					    tmp[n] = lfnObj.firstChar[k];
+					    ++n;
+					}
+				    for(int k = 0; k < 12; k += 2)
+					{
+					    if((byte)lfnObj.secondChar[k] == 0xFF)
+						break;
+
+					    tmp[n] = lfnObj.secondChar[k];
+					    ++n;
+					}
+				    for(int k = 0; k < 4; k += 2)
+					{
+					    if((byte)lfnObj.thirdChar[k] == 0xFF)
+						break;
+
+					    tmp[n] = lfnObj.thirdChar[k];
+					    ++n;
+					}
+
+				    tmp[n] = 0;
+
+				    utils::Copy(tmp, lfn + lfnOffset - n, n);
+				    lfn[255] = 0;
+				    lfnOffset -= n;
+
+				    //Only 6 bits are for order
+				    // SystemProvider::instance->GetVGATextSystem()->PrintText(lfn + lfnOffset);
+				    //SystemProvider::instance->GetVGATextSystem()->PrintChar(' ');
+				    // SystemProvider::instance->GetVGATextSystem()->PrintText(tmp);
+				    //SystemProvider::instance->GetVGATextSystem()->NewLine();
+
+				    continue;
+				}
+
+			    FAT32Object& obj = *reinterpret_cast<FAT32Object*>(buffer + j);
+
+			    if(!(byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
+				{
+				    //Deleted
+				    continue;
+				}
+
+			    if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_VOLUME_ID)
+				{
+				    //System
+				    continue;
+				}
+
+			    entries[result].id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
+			    entries[result].isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
+			    entries[result].size = obj.size;
+
+			    //SystemProvider::instance->GetVGATextSystem()->PrintText(lfn);
 			    //SystemProvider::instance->GetVGATextSystem()->NewLine();
 
-			    continue;
-			}
-
-		    FAT32Object& obj = *reinterpret_cast<FAT32Object*>(buffer + j);
-
-		    if(!(byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
-			{
-			    //Deleted
-			    continue;
-			}
-
-		    if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_VOLUME_ID)
-			{
-			    //System
-			    continue;
-			}
-
-		    entries[result].id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
-		    entries[result].isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
-		    entries[result].size = obj.size;
-
-		    //SystemProvider::instance->GetVGATextSystem()->PrintText(lfn);
-		    //SystemProvider::instance->GetVGATextSystem()->NewLine();
-
-		    if(lfnOffset == 255)
-			{
-			    int index = utils::FindChar(obj.name, ' ', 11);
-
-			    utils::StringAppend(obj.name, entries[result].name, index, 256);
-			    if(!entries[result].isDirectory)
+			    if(lfnOffset == 255)
 				{
-				    utils::StringAppend(".", entries[result].name, 1, 256);
-				    index = utils::FindChar(obj.name + 8, ' ', 3);
-				    if(index < 0)
-					index = 0;
-				    utils::StringAppend(obj.name + index + 8, entries[result].name, 3, 256);
+				    int index = utils::FindChar(obj.name, ' ', 11);
+
+				    utils::StringAppend(obj.name, entries[result].name, index, 256);
+				    if(!entries[result].isDirectory)
+					{
+					    utils::StringAppend(".", entries[result].name, 1, 256);
+					    index = utils::FindChar(obj.name + 8, ' ', 3);
+					    if(index < 0)
+						index = 0;
+					    utils::StringAppend(obj.name + index + 8, entries[result].name, 3, 256);
+					}
 				}
-			}
-		    else
-			{
-			    utils::StringAppend(lfn + lfnOffset, entries[result].name, 256, 256);
-			    lfn[0] = 0;
-			    lfnOffset = 255;
+			    else
+				{
+				    utils::StringAppend(lfn + lfnOffset, entries[result].name, 256, 256);
+				    lfn[0] = 0;
+				    lfnOffset = 255;
+				}
+
+			    ++result;
 			}
 
-		    ++result;
+		    if(done)
+			break;
 		}
-
-	    if(done)
-		break;
+	
+		if(!done)
+		{
+			dir =GetFATNextCluster(dir);
+		}
+	
 	}
 
     return result;
