@@ -95,8 +95,8 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 
     while(!done)
 	{
-		sector = dir * CLUSTER_SIZE + rootStartSector;
-		
+	    sector = dir * CLUSTER_SIZE + rootStartSector;
+
 	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 		{
 
@@ -183,33 +183,42 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 				    continue;
 				}
 
-			    entries[result].id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
-			    entries[result].isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
-			    entries[result].size = obj.size;
+			    FSEntry entry;
+
+			    entry.id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
+			    entry.id -= extendedRecord.fileSystemInfoSector + 1;
+			    entry.isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
+			    entry.size = obj.size;
 
 			    //SystemProvider::instance->GetVGATextSystem()->PrintText(lfn);
 			    //SystemProvider::instance->GetVGATextSystem()->NewLine();
 
 			    if(lfnOffset == 255)
 				{
+
 				    int index = utils::FindChar(obj.name, ' ', 11);
 
-				    utils::StringAppend(obj.name, entries[result].name, index, 256);
-				    if(!entries[result].isDirectory)
+				    utils::StringAppend(obj.name, entry.name, index, 256);
+				    if(!entry.isDirectory)
 					{
-					    utils::StringAppend(".", entries[result].name, 1, 256);
+					    utils::StringAppend(".", entry.name, 1, 256);
 					    index = utils::FindChar(obj.name + 8, ' ', 3);
 					    if(index < 0)
 						index = 0;
-					    utils::StringAppend(obj.name + index + 8, entries[result].name, 3, 256);
+					    utils::StringAppend(obj.name + index + 8, entry.name, 3, 256);
 					}
 				}
 			    else
 				{
-				    utils::StringAppend(lfn + lfnOffset, entries[result].name, 256, 256);
+				    utils::StringAppend(lfn + lfnOffset, entry.name, 256, 256);
 				    lfn[0] = 0;
 				    lfnOffset = 255;
 				}
+
+			    if(entry.isDirectory && (utils::StringEqual(entry.name, ".", 2) || utils::StringEqual(entry.name, "..", 3)))
+				continue;
+
+			    entries[result] = entry;
 
 			    ++result;
 			}
@@ -217,12 +226,11 @@ uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
 		    if(done)
 			break;
 		}
-	
-		if(!done)
+
+	    if(!done)
 		{
-			dir =GetFATNextCluster(dir);
+		    dir = GetFATNextCluster(dir);
 		}
-	
 	}
 
     return result;

@@ -39,6 +39,7 @@ void kmain()
 
     systemProvider->GetCPUSystem()->EnableInterrupts();
 
+
     FSEntry buffer[32];
     uint size = systemProvider->GetFileSystem()->GetEntries(0, buffer, 32);
 
