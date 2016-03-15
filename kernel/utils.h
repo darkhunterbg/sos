@@ -14,7 +14,20 @@ void Copy(const void* source, void* dest, uint size)
 	    d[i] = s[i];
 	}
 }
-bool Compare(const void* a,const void* b, uint count)
+uint StringCopy(const char* s, char* d, uint size)
+{
+    for(uint i = 0; i < size; ++i)
+	{
+	    d[i] = s[i];
+	    if(s[i] == 0)
+			return i ;
+	}
+	
+	d[size] = 0;
+	
+	return size;
+}
+bool Compare(const void* a, const void* b, uint count)
 {
     for(uint i = 0; i < count; ++i)
 	if(((byte*)a)[i] != ((byte*)b)[i])

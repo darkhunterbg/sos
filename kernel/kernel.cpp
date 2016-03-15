@@ -39,11 +39,17 @@ void kmain()
 
     systemProvider->GetCPUSystem()->EnableInterrupts();
 
-    for(int i = 0; i < 16; ++i)
-	{
-	    DIR next = systemProvider->GetFileSystem()->GetFATNextCluster(i);
+    FSEntry buffer[32];
+    uint size = systemProvider->GetFileSystem()->GetEntries(0, buffer, 32);
 
-	    systemProvider->GetVGATextSystem()->PrintNumber(next);
+    systemProvider->GetVGATextSystem()->PrintNumber(size);
+    systemProvider->GetVGATextSystem()->PrintChar('\n');
+
+    for(int i = 0; i < size; ++i)
+	{
+	    systemProvider->GetVGATextSystem()->PrintText(buffer[i].name);
+	    systemProvider->GetVGATextSystem()->PrintChar(' ');
+	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].id);
 	    systemProvider->GetVGATextSystem()->PrintChar('\n');
 	}
     systemProvider->GetCPUSystem()->Halt();

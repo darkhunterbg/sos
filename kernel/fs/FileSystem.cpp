@@ -1,5 +1,6 @@
 #include "FileSystem.h"
 #include "../utils.h"
+#include "../SystemProvider.h"
 
 namespace fs
 {
@@ -51,39 +52,103 @@ ATAController& FileSystem::GetATAController()
     return *ataController;
 }
 
-DIR FileSystem::GetRoot()
+FSID FileSystem::GetFATNextCluster(FSID cluster)
 {
-    return 0;
+    if(cluster < 0)
+	return -1;
 
-    // bootRecord.reservedSectorsCount = start of FAT
-}
-
-DIR FileSystem::GetFATNextCluster(DIR cluster)
-{
-	if(cluster < 0)
-		return -1;
-	
-	
-    uint fatOffset = (cluster  + extendedRecord.fileSystemInfoSector + 1) * 4;
+    uint fatOffset = (cluster + extendedRecord.fileSystemInfoSector + 1) * 4;
     uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
-    uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE) ;
+    uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE);
 
     //Load fat sector and get entry
     byte buffer[ATAController::SECTOR_SIZE];
 
     ataController->Read(fatSector, 1, buffer);
-	
-	//remember to ignore the high 4 bits.
-	uint tableValue = *(uint*)(buffer + entryOffset) & 0x0FFFFFFF;
-	
-	
-	if(tableValue < extendedRecord.fileSystemInfoSector + 1 || tableValue == (uint)0x0FFFFFFF )
-		return -1;
-	
-	return (DIR)(tableValue - extendedRecord.fileSystemInfoSector - 1 );
+
+    //remember to ignore the high 4 bits.
+    uint tableValue = *(uint*)(buffer + entryOffset) & 0x0FFFFFFF;
+
+    if(tableValue < extendedRecord.fileSystemInfoSector + 1 || tableValue == (uint)0x0FFFFFFF)
+	return -1;
+
+    return (FSID)(tableValue - extendedRecord.fileSystemInfoSector - 1);
 }
 
-DIR FileSystem::SearchDir(DIR currentDir, const char* name, uint nameLength, const char* ext, bool isDir)
+FSID FileSystem::SearchDir(FSID currentDir, const char* name, uint nameLength, const char* ext, bool isDir)
 {
+}
+
+uint FileSystem::GetEntries(FSID dir, FSEntry* entries, uint maxEntries)
+{
+    byte buffer[ATAController::SECTOR_SIZE];
+    uint sector = dir * CLUSTER_SIZE + rootStartSector;
+
+    uint result = 0;
+
+    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+	{
+
+	    ataController->Read(sector + i, 1, buffer);
+
+	    bool done = false;
+
+	    for(uint j = 0; j < ATAController::SECTOR_SIZE; j += sizeof(FAT32Object))
+		{
+		    if(result == maxEntries - 1)
+			{
+			    done = true;
+			    break;
+			}
+
+		    if(buffer[j] == 0)
+			{
+			    //No mo entries
+			    done = true;
+			    break;
+			}
+		    if(buffer[j] == 0xE5)
+			{
+			    //Unused
+			    continue;
+			}
+		    if(buffer[j + 11] == (byte)FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
+			{
+				//SystemProvider::instance->GetVGATextSystem()->PrintText("LFN\n");
+				
+			    continue;
+			}
+
+
+		    FAT32Object& obj = *reinterpret_cast<FAT32Object*>(buffer + j);
+			
+			
+		    if(!(byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_ARCHIVE)
+			{
+			    //Deleted
+			    continue;
+			}
+
+			 if((byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_VOLUME_ID)
+			{
+			    //System
+			    continue;
+			}
+
+		    entries[result].id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
+		    entries[result].isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
+		    entries[result].size = obj.size;
+		    uint length = utils::StringCopy(obj.name, entries[result].name, 11);
+		  //  entries[result].name[length + 1] = '.';
+		  //  utils::StringCopy(obj.name, entries[result].name + length + 1, 3);
+			
+			++result;
+		}
+
+	    if(done)
+		break;
+	}
+
+    return result;
 }
 }

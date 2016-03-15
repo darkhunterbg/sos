@@ -81,7 +81,25 @@ struct FAT32LongFileEntry
 
 
 //In sectors
-typedef int DIR;
+typedef int FSID;
+
+struct FSEntry
+{
+	 char*  name;
+	FSID id;
+	uint size;
+	bool isDirectory;
+	
+	FSEntry()
+	{
+		name = new char[256];
+		name[0] = 0;
+	}
+	~FSEntry()
+	{
+		delete[] name;
+	}
+};
 
 class FileSystem
 {
@@ -101,15 +119,17 @@ class FileSystem
 	FAT32BootRecord bootRecord;
     FAT32ExtendedBootRecord extendedRecord;
 
-	
-	DIR SearchDir(DIR currentDir, const char* name, uint nameLength, const char* ext, bool isDir);
+	FSID GetFATNextCluster(FSID cluster);
+	FSID SearchDir(FSID currentDir, const char* name, uint nameLength, const char* ext, bool isDir);
 	
 	public :
 	FileSystem();
 	~FileSystem();
 	
-	DIR GetRoot();
-	DIR GetFATNextCluster(DIR cluster);
+	uint GetEntries(FSID dir, FSEntry* buffer, uint bufferSize);
+
+	
+	
 	ATAController& GetATAController();
 };
 }
