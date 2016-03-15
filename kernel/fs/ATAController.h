@@ -51,7 +51,7 @@ class ATAController
     static void PrimaryHandler(SystemProvider& provider);
     bool Poll();
   public:
-    uint SECTOR_SIZE = 512;
+    static const uint SECTOR_SIZE = 512;
 
     ATAController();
     ~ATAController();

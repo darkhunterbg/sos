@@ -33,6 +33,7 @@
     <File Name="io.h"/>
     <File Name="SystemProvider.h"/>
     <File Name="SystemProvider.cpp"/>
+    <File Name="utils.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="memory">
     <File Name="memory/MemorySystem.h"/>

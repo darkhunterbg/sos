@@ -39,20 +39,14 @@ void kmain()
 
     systemProvider->GetCPUSystem()->EnableInterrupts();
 
-
-     byte* buffer = new byte[512 * 9];
-    bool read = systemProvider->GetFileSystem()->GetATAController().Read(8200, 9, buffer);
-    if(read)
+    for(int i = 0; i < 16; ++i)
 	{
-		systemProvider->GetVGATextSystem()->PrintText("SUCCESS\n");
-	    for(int i = 512*8; i < 512 * 9; ++i)
-		{
-		    systemProvider->GetVGATextSystem()->PrintChar(buffer[i]);
-		}
+	    DIR next = systemProvider->GetFileSystem()->GetFATNextCluster(i);
+
+	    systemProvider->GetVGATextSystem()->PrintNumber(next);
+	    systemProvider->GetVGATextSystem()->PrintChar('\n');
 	}
-    else
-		systemProvider->GetVGATextSystem()->PrintText("FAILED");
-	systemProvider->GetCPUSystem()->Halt();
+    systemProvider->GetCPUSystem()->Halt();
     //TextInput();
     //DrawGUI();
 

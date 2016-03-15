@@ -71,8 +71,8 @@ bool ATAController::Read(ulong startSector, ushort lengthSectors, byte* buffer)
     for(ushort s = 0; s < lengthSectors; ++s)
 	{
 	    // SystemProvider::instance->GetVGATextSystem()->ClearScreen();
-	    //  if(!Poll())
-	    //return false;
+	      if(!Poll())
+	    return false;
 
 	    for(uint i = 0; i < 256; ++i)
 		{
