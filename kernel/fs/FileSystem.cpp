@@ -53,12 +53,40 @@ ATAController& FileSystem::GetATAController()
     return *ataController;
 }
 
+FSID FileSystem::GetFreeCluster()
+{
+    byte buffer[ATAController::SECTOR_SIZE];
+
+    uint sector = fatStartSector;
+
+    uint result = 0;
+    ;
+
+    for(uint i = 0; i < extendedRecord.sectorsPerFAT; ++i)
+	{
+	    ataController->Read(sector, 1, buffer);
+	    uint* table = (uint*)(buffer);
+	    for(uint j = 0; j < ATAController::SECTOR_SIZE / 4; ++j)
+		{
+		    uint cluster = table[j];
+		    if(cluster == 0)
+			return result;
+
+		    ++result;
+		}
+
+	    sector += ATAController::SECTOR_SIZE;
+	}
+
+    return -1;
+}
+
 FSID FileSystem::GetFATNextCluster(FSID cluster)
 {
-    if(cluster < clusterIdOffset)
+    if((uint)cluster < clusterIdOffset)
 	return -1;
 
-    uint fatOffset = (cluster - clusterIdOffset + extendedRecord.fileSystemInfoSector + 1) * 4;
+    uint fatOffset = (cluster  ) * 4;
     uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
     uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE);
 
@@ -82,8 +110,8 @@ FSEntry FileSystem::GetRoot()
 
     result.id = 2;
     utils::StringCopy("/", result.name, 2);
-	result.isDirectory = true;
-	result.size = 0;
+    result.isDirectory = true;
+    result.size = 0;
 
     return result;
 }
@@ -245,6 +273,76 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 		    cluster = GetFATNextCluster(cluster);
 		}
 	}
+
+    return result;
+}
+
+FSEntry FileSystem::CreateDirectory(const char* name, uint nameLength, FSEntry parent)
+{
+    //find free cluster
+    FSID freeCluster = GetFreeCluster();
+    if(freeCluster < 0)
+	return FSEntry();
+
+    FSEntry result;
+    result.id = freeCluster;
+    result.isDirectory = true;
+    result.size = 0;
+    utils::StringCopy(name, result.name, 256);
+
+    byte* buffer = new byte[ATAController::SECTOR_SIZE * CLUSTER_SIZE];
+
+    //Read directory entries
+    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+	{
+	    uint sector = parent.id + rootStartSector - clusterIdOffset + i;
+	    ataController->Read(sector, 1, buffer + i * ATAController::SECTOR_SIZE);
+	}
+
+    for(uint i = 0; i < ATAController::SECTOR_SIZE * CLUSTER_SIZE; i += sizeof(FAT32Object))
+	{
+	    if(buffer[i] == 0 || buffer[i] == 0xE5)
+		{
+		    //Free entry
+
+		    FAT32Object& obj = *(FAT32Object*)(buffer +i);
+		    obj.attributes = FAT32ObjectAttribte::FAT32OA_DIRECTORY;
+		    for(uint j = 0; j < 11; ++j)
+			obj.name[j] = ' ';
+		    utils::Copy(name, obj.name, nameLength);
+			obj.size =0;
+			obj.firstCluserL = freeCluster & 0xFFFF;
+			obj.firstClusterH = freeCluster & 0xFFFF0000;
+
+
+		    break;
+		}
+	}
+	
+	//return result;
+	//Write back the entire cluster
+	for(uint i = 0; i < CLUSTER_SIZE; ++i)
+	{
+		uint sector = parent.id + rootStartSector - clusterIdOffset + i;
+	    ataController->Write(sector, 1, buffer + i * ATAController::SECTOR_SIZE);
+	}
+	
+	//Write to the FAT table
+	uint fatOffset = (freeCluster  ) * 4;
+    uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
+    uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE) / 4;
+
+    ataController->Read(fatSector, 1, buffer);
+
+
+	uint* tableValue = (uint*)(buffer);//
+	tableValue[ entryOffset] =  0x0FFFFFFF;
+	
+	ataController->Write(fatSector, 1, buffer );
+
+    //TODO if cluster is full, create new cluster for this dir
+	//TODO write to backup fat table
+    delete[] buffer;
 
     return result;
 }

@@ -121,6 +121,7 @@ class FileSystem
     FAT32ExtendedBootRecord extendedRecord;
 
 	FSID GetFATNextCluster(FSID cluster);
+	FSID GetFreeCluster();
 	
 	public :
 	FileSystem();
@@ -128,7 +129,7 @@ class FileSystem
 	
 	uint GetEntries(FSEntry dir, FSEntry* buffer, uint bufferSize);
 	FSEntry GetRoot();
-	
+	FSEntry CreateDirectory(const char* name,uint nameLength, FSEntry parent);
 	
 	ATAController& GetATAController();
 };

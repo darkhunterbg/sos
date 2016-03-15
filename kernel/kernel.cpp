@@ -44,12 +44,15 @@ void kmain()
 	
 	FSEntry root = systemProvider->GetFileSystem()->GetRoot();
 	
+	//FSEntry dir = systemProvider->GetFileSystem()->CreateDirectory("TEST",4,root);
+	
+	
     uint size = systemProvider->GetFileSystem()->GetEntries(root, buffer, 32);
 
     systemProvider->GetVGATextSystem()->PrintNumber(size);
     systemProvider->GetVGATextSystem()->PrintChar('\n');
 
-    for(int i = 0; i < size; ++i)
+    for(uint i = 0; i < size; ++i)
 	{
 	    systemProvider->GetVGATextSystem()->PrintText(buffer[i].name);
 	    systemProvider->GetVGATextSystem()->PrintText(" ID:");

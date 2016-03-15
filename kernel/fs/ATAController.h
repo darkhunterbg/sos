@@ -57,6 +57,7 @@ class ATAController
     ~ATAController();
 
     bool Read(ulong startSector, ushort lengthSectors, byte* outBuffer);
+	bool Write(ulong startSector, ushort lengthSectors, const byte* buffer);
 	
 };
 }
