@@ -28,42 +28,70 @@ uint StringCopy(const char* s, char* d, uint size)
     return size;
 }
 
-uint StringUTFCopy(const char* utfs, char *d, uint size)
+uint StringUTFCopy(const char* utfs, char* d, uint size)
 {
-	for(uint i = 0; i < size; i+=2)
+    for(uint i = 0; i < size; i += 2)
 	{
-		if(utfs[i] == 0 || utfs[i] == (char)0xFF)
-		return i/2 ;
-		
-	    d[i/2] = utfs[i];
-	
+	    if(utfs[i] == 0 || utfs[i] == (char)0xFF)
+		return i / 2;
+
+	    d[i / 2] = utfs[i];
 	}
 
-    d[size/2] = 0;
+    d[size / 2] = 0;
 
-    return size/2;
+    return size / 2;
 }
 
-uint StringCopyUTF(const char * s, char *utfd, uint size , uint utfSize)
+uint StringCopyUTF(const char* s, char* utfd, uint size, uint utfSize)
 {
-	uint max = utfSize / 2;
-	if(max > size)
-		max = size;
-	
-	for(uint i=0;i< utfSize;++i)
+    uint max = utfSize / 2;
+    if(max > size)
+	max = size;
+
+    for(uint i = 0; i < utfSize; ++i)
 	{
-		utfd[i] = (char)0xFF;
-	}
-	for(uint i = 0; i < max; i++)
-	{
-		if(s[i]==0)
-			return i;
-		
-		utfd[i*2] = s[i];
-		utfd[i*2 + 1] = 0;
+	    utfd[i] = (char)0xFF;
 	}
 	
-	return max;
+	if(max==0)
+		return 0;
+	
+    for(uint i = 0; i < max; i++)
+	{
+	    utfd[i * 2] = s[i];
+	    utfd[i * 2 + 1] = 0;
+
+	    if(s[i] == 0)
+		return i;
+	}
+
+    if(max < utfSize / 2 )
+	{
+	    utfd[max * 2] = 0;
+	    utfd[max * 2 + 1] = 0;
+	}
+
+    return max;
+}
+const char* GetExtension(const char* s, uint size)
+{
+    for(int i = size - 1; i >= 0; --i)
+	{
+	    if(s[i] == '.')
+		return s + i + 1;
+	}
+
+    return nullptr;
+}
+
+uint StringLength(const char* s)
+{
+    uint result = 0;
+    while(s[result] != 0 && result < 300)
+	++result;
+
+    return result;
 }
 
 uint StringAppend(const char* s, char* d, uint sSize, uint dSize)

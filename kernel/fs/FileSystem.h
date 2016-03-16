@@ -142,6 +142,8 @@ class FileSystem
 	uint GetSectorForCluster(FSID cluster);
 	FSID GetLastCluster(FSID cluster);
 	
+	CreateResult CreateEntry(const char* name,uint nameLength, FSEntry parent,bool isDir, FSEntry& outEntry);
+	
 	FSID StoreOnDisk(FSID parent,const FAT32Object& entry, FAT32LongFileEntry* lfnEntries, uint lfnCount);
 	
 	public :
@@ -150,7 +152,8 @@ class FileSystem
 	
 	uint GetEntries(FSEntry dir, FSEntry* buffer, uint bufferSize);
 	FSEntry GetRoot();
-	CreateResult CreateDirectory(const char* name,uint nameLength, FSEntry parent, FSEntry& outEntry);
+	CreateResult CreateDirectory(const char* name, FSEntry parent, FSEntry& outEntry);
+	CreateResult CreateFile(const char* name, FSEntry parent, FSEntry& outEntry);
 	
 	ATAController& GetATAController();
 };

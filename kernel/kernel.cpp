@@ -45,7 +45,7 @@ void kmain()
 	FSEntry root = systemProvider->GetFileSystem()->GetRoot();
 	
 	FSEntry dir ;
-	 systemProvider->GetFileSystem()->CreateDirectory("Test123LongName",15,root, dir);
+	 systemProvider->GetFileSystem()->CreateFile("Test123LongName.txt",root, dir);
 	
 	
     uint size = systemProvider->GetFileSystem()->GetEntries(root, buffer, 32);

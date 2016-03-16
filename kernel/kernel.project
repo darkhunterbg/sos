@@ -55,6 +55,18 @@
     <File Name="cpu/CPUInterruptor.h"/>
     <File Name="cpu/CPUInterruptor.cpp"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="input">
+    <File Name="input/KeyboardSystem.h"/>
+    <File Name="input/KeyboardSystem.cpp"/>
+    <File Name="input/PS2Controller.h"/>
+    <File Name="input/PS2Controller.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="fs">
+    <File Name="fs/FileSystem.h"/>
+    <File Name="fs/FileSystem.cpp"/>
+    <File Name="fs/ATAController.h"/>
+    <File Name="fs/ATAController.cpp"/>
+  </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -156,16 +168,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="input">
-    <File Name="input/KeyboardSystem.h"/>
-    <File Name="input/KeyboardSystem.cpp"/>
-    <File Name="input/PS2Controller.h"/>
-    <File Name="input/PS2Controller.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="fs">
-    <File Name="fs/FileSystem.h"/>
-    <File Name="fs/FileSystem.cpp"/>
-    <File Name="fs/ATAController.h"/>
-    <File Name="fs/ATAController.cpp"/>
-  </VirtualDirectory>
 </CodeLite_Project>

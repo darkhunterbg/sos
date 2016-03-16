@@ -390,8 +390,9 @@ FSID FileSystem::StoreOnDisk(FSID parent, const FAT32Object& entry, FAT32LongFil
     return cluster;
 }
 
-CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEntry parent, FSEntry& result)
+CreateResult FileSystem::CreateEntry(const char* name, uint nameLength, FSEntry parent, bool isDir, FSEntry& result)
 {
+
     uint lfnEntries = nameLength / LFN_ENTRY_SIZE;
     if(nameLength <= 11)
 	lfnEntries = 0;
@@ -399,14 +400,20 @@ CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEn
 	++lfnEntries;
 
     //find free cluster
-    FSID freeCluster = GetNextFreeCluster(parent.id);
-    if(freeCluster < 0)
-	return CreateResult::INVALID_PARENT;
 
-    SetFATClusterValue(freeCluster, USED_CLUSTER);
+    if(isDir)
+	{
+	    FSID freeCluster = GetNextFreeCluster(parent.id);
+	    if(freeCluster < 0)
+		return CreateResult::INVALID_PARENT;
 
-    result.id = freeCluster;
-    result.isDirectory = true;
+	    SetFATClusterValue(freeCluster, USED_CLUSTER);
+	    result.id = freeCluster;
+	}
+    else
+	result.id = 0;
+
+    result.isDirectory = isDir;
     result.size = 0;
     utils::StringCopy(name, result.name, 256);
 
@@ -416,7 +423,7 @@ CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEn
 
     FAT32LongFileEntry lfnObj[20];
 
-    obj.attributes = FAT32ObjectAttribte::FAT32OA_DIRECTORY;
+    obj.attributes = isDir ? FAT32ObjectAttribte::FAT32OA_DIRECTORY : FAT32ObjectAttribte::FAT32OA_ARCHIVE;
 
     if(lfnEntries == 0)
 	{
@@ -429,8 +436,23 @@ CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEn
 
 	    utils::Copy(name, obj.name, 11);
 	    utils::Copy("~1", obj.name + 6, 2);
+
 	    for(uint j = 8; j < 11; ++j)
 		obj.name[j] = ' ';
+
+	    if(!isDir)
+		{
+		    const char* ext = utils::GetExtension(name, nameLength);
+		    uint size = utils::StringLength(ext);
+		    size = size < 3 ? 3 : size;
+		    utils::Copy(ext, obj.name + 8, size);
+		}
+
+	    byte checkSum = 0;
+	    for(uint i = 0; i < 11; ++i)
+		{
+		    checkSum = (((checkSum & 1) << 7) | ((checkSum & 0xfe) >> 1)) + obj.name[i];
+		}
 
 	    uint n = 0;
 
@@ -442,40 +464,33 @@ CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEn
 		    if(i == lfnEntries - 1)
 			e.order |= 0b01000000;
 		    e._zero = 0;
-			
-		    e.checksum = 0;
-		    for(uint i = 0; i < 11; ++i)
-			{
-				e.checksum = (((e.checksum & 1) << 7) | ((e.checksum & 0xfe) >> 1)) + obj.name[i];
-				
-			}
+		    e.checksum = checkSum;
 		    e.type = 0;
-			
-			SystemProvider::instance->GetVGATextSystem()->PrintNumber(e.checksum , vga::NumberFormatting::NF_HEX);
-			SystemProvider::instance->GetVGATextSystem()->NewLine();
+
+		    SystemProvider::instance->GetVGATextSystem()->PrintNumber(e.checksum, vga::NumberFormatting::NF_HEX);
+		    SystemProvider::instance->GetVGATextSystem()->NewLine();
 
 		    n += utils::StringCopyUTF(name + n, e.firstChar, nameLength - n, 10);
 		    n += utils::StringCopyUTF(name + n, e.secondChar, nameLength - n, 12);
 		    n += utils::StringCopyUTF(name + n, e.thirdChar, nameLength - n, 4);
-
-		    /*SystemProvider::instance->GetVGATextSystem()->PrintText(e.firstChar);
-			SystemProvider::instance->GetVGATextSystem()->NewLine();
-			SystemProvider::instance->GetVGATextSystem()->PrintText(e.secondChar);
-			SystemProvider::instance->GetVGATextSystem()->NewLine();
-			SystemProvider::instance->GetVGATextSystem()->PrintText(e.thirdChar);
-			SystemProvider::instance->GetVGATextSystem()->NewLine();
-
-		    SystemProvider::instance->GetVGATextSystem()->NewLine();*/
 		}
 	}
     obj.size = 0;
-    obj.firstCluserL = freeCluster & 0xFFFF;
-    obj.firstClusterH = freeCluster & 0xFFFF0000;
+    obj.firstCluserL = result.id  & 0xFFFF;
+    obj.firstClusterH = result.id  & 0xFFFF0000;
 
     StoreOnDisk(parent.id, obj, lfnObj, lfnEntries);
 
-    //=================================================
-
     return CreateResult::CS_SUCCESS;
+}
+
+CreateResult FileSystem::CreateDirectory(const char* name, FSEntry parent, FSEntry& result)
+{
+    return CreateEntry(name, utils::StringLength(name), parent, true, result);
+}
+
+CreateResult FileSystem::CreateFile(const char* name, FSEntry parent, FSEntry& result)
+{
+    return CreateEntry(name, utils::StringLength(name), parent, false, result);
 }
 }
