@@ -344,9 +344,9 @@ FSID FileSystem::StoreOnDisk(FSID parent, const FAT32Object& entry, FAT32LongFil
 
     while(neededEntries > 0)
 	{
-		SystemProvider::instance->GetVGATextSystem()->PrintNumber(neededEntries);
-		SystemProvider::instance->GetVGATextSystem()->PrintChar(' ');
-		
+	    SystemProvider::instance->GetVGATextSystem()->PrintNumber(neededEntries);
+	    SystemProvider::instance->GetVGATextSystem()->PrintChar(' ');
+
 	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 		{
 		    ataController->Read(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
@@ -366,14 +366,14 @@ FSID FileSystem::StoreOnDisk(FSID parent, const FAT32Object& entry, FAT32LongFil
 			}
 
 		    --neededEntries;
-			
-			if(neededEntries == 0)
-				break;
+
+		    if(neededEntries == 0)
+			break;
 		}
 
 	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 		{
-		     ataController->Write(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
+		    ataController->Write(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
 		}
 
 	    sector = GetSectorForCluster(currentCluster);
@@ -395,7 +395,7 @@ CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEn
     uint lfnEntries = nameLength / LFN_ENTRY_SIZE;
     if(nameLength <= 11)
 	lfnEntries = 0;
-    else if(lfnEntries == 0)
+    else if(lfnEntries % LFN_ENTRY_SIZE != 0)
 	++lfnEntries;
 
     //find free cluster
@@ -420,38 +420,58 @@ CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEn
 
     if(lfnEntries == 0)
 	{
-		utils::Copy(name, obj.name, 11);
+	    utils::Copy(name, obj.name, 11);
 	    for(uint j = nameLength; j < 11; ++j)
 		obj.name[j] = ' ';
 	}
     else
 	{
-	    for(uint j = 0; j < 11; ++j)
-		obj.name[j] = '~';
+
+	    utils::Copy(name, obj.name, 11);
+	    utils::Copy("~1", obj.name + 6, 2);
+	    for(uint j = 8; j < 11; ++j)
+		obj.name[j] = ' ';
 
 	    uint n = 0;
-	    for(int i = lfnEntries - 1; i >= 0; --i)
+
+	    for(uint i = 0; i < lfnEntries; ++i)
 		{
 		    FAT32LongFileEntry& e = lfnObj[i];
 		    e.attributes = FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY;
 		    e.order = i + 1;
-		    if(i == 0)
-			e.order |= 0b00100000;
+		    if(i == lfnEntries - 1)
+			e.order |= 0b01000000;
 		    e._zero = 0;
+			
 		    e.checksum = 0;
+		    for(uint i = 0; i < 11; ++i)
+			{
+				e.checksum = (((e.checksum & 1) << 7) | ((e.checksum & 0xfe) >> 1)) + obj.name[i];
+				
+			}
 		    e.type = 0;
+			
+			SystemProvider::instance->GetVGATextSystem()->PrintNumber(e.checksum , vga::NumberFormatting::NF_HEX);
+			SystemProvider::instance->GetVGATextSystem()->NewLine();
 
 		    n += utils::StringCopyUTF(name + n, e.firstChar, nameLength - n, 10);
 		    n += utils::StringCopyUTF(name + n, e.secondChar, nameLength - n, 12);
 		    n += utils::StringCopyUTF(name + n, e.thirdChar, nameLength - n, 4);
+
+		    /*SystemProvider::instance->GetVGATextSystem()->PrintText(e.firstChar);
+			SystemProvider::instance->GetVGATextSystem()->NewLine();
+			SystemProvider::instance->GetVGATextSystem()->PrintText(e.secondChar);
+			SystemProvider::instance->GetVGATextSystem()->NewLine();
+			SystemProvider::instance->GetVGATextSystem()->PrintText(e.thirdChar);
+			SystemProvider::instance->GetVGATextSystem()->NewLine();
+
+		    SystemProvider::instance->GetVGATextSystem()->NewLine();*/
 		}
 	}
     obj.size = 0;
     obj.firstCluserL = freeCluster & 0xFFFF;
     obj.firstClusterH = freeCluster & 0xFFFF0000;
-	
-	SystemProvider::instance->GetVGATextSystem()->PrintNumber(freeCluster);
-	SystemProvider::instance->GetVGATextSystem()->NewLine();
+
     StoreOnDisk(parent.id, obj, lfnObj, lfnEntries);
 
     //=================================================

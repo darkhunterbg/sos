@@ -46,20 +46,24 @@ uint StringUTFCopy(const char* utfs, char *d, uint size)
 
 uint StringCopyUTF(const char * s, char *utfd, uint size , uint utfSize)
 {
+	uint max = utfSize / 2;
+	if(max > size)
+		max = size;
+	
 	for(uint i=0;i< utfSize;++i)
 	{
 		utfd[i] = (char)0xFF;
 	}
-	for(uint i = 0; i < size; i++)
+	for(uint i = 0; i < max; i++)
 	{
 		if(s[i]==0)
 			return i;
 		
 		utfd[i*2] = s[i];
-			
+		utfd[i*2 + 1] = 0;
 	}
 	
-	return size;
+	return max;
 }
 
 uint StringAppend(const char* s, char* d, uint sSize, uint dSize)
