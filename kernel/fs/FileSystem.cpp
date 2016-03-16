@@ -53,6 +53,11 @@ ATAController& FileSystem::GetATAController()
     return *ataController;
 }
 
+uint FileSystem::GetSectorForCluster(FSID cluster)
+{
+    return (cluster - clusterIdOffset) * CLUSTER_SIZE + rootStartSector;
+}
+
 FSID FileSystem::GetFreeCluster()
 {
     byte buffer[ATAController::SECTOR_SIZE];
@@ -80,13 +85,21 @@ FSID FileSystem::GetFreeCluster()
 
     return -1;
 }
+FSID FileSystem::GetLastCluster(FSID cluster)
+{
+    FSID result = GetFATNextCluster(cluster);
+    while(result != -1)
+	result = GetFATNextCluster(result);
+
+    return result;
+}
 
 FSID FileSystem::GetFATNextCluster(FSID cluster)
 {
     if((uint)cluster < clusterIdOffset)
 	return -1;
 
-    uint fatOffset = (cluster  ) * 4;
+    uint fatOffset = (cluster)*4;
     uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
     uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE);
 
@@ -96,12 +109,27 @@ FSID FileSystem::GetFATNextCluster(FSID cluster)
     ataController->Read(fatSector, 1, buffer);
 
     //remember to ignore the high 4 bits.
-    uint tableValue = *(uint*)(buffer + entryOffset) & 0x0FFFFFFF;
+    uint tableValue = *(uint*)(buffer + entryOffset) & USED_CLUSTER;
 
-    if(tableValue == 0 || tableValue == (uint)0x0FFFFFFF)
+    if(tableValue == 0 || tableValue == USED_CLUSTER)
 	return -1;
 
     return tableValue;
+}
+void FileSystem::SetFATClusterValue(FSID cluster, uint value)
+{
+    byte buffer[512];
+
+    uint fatOffset = (cluster)*4;
+    uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
+    uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE) / 4;
+
+    ataController->Read(fatSector, 1, buffer);
+
+    uint* tableValue = (uint*)(buffer); //
+    tableValue[entryOffset] = value;
+
+    ataController->Write(fatSector, 1, buffer);
 }
 
 FSEntry FileSystem::GetRoot()
@@ -137,7 +165,7 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 
     while(!done)
 	{
-	    sector = (cluster - clusterIdOffset) * CLUSTER_SIZE + rootStartSector;
+	    sector = GetSectorForCluster(cluster);
 
 	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 		{
@@ -158,7 +186,7 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 				    done = true;
 				    break;
 				}
-			    if(buffer[j] == 0xE5)
+			    if(buffer[j] == UNUSED_FAT_ENTRY)
 				{
 				    //Unused
 				    continue;
@@ -295,53 +323,42 @@ FSEntry FileSystem::CreateDirectory(const char* name, uint nameLength, FSEntry p
     //Read directory entries
     for(uint i = 0; i < CLUSTER_SIZE; ++i)
 	{
-	    uint sector = parent.id + rootStartSector - clusterIdOffset + i;
+	    uint sector = GetSectorForCluster(parent.id) + i;
 	    ataController->Read(sector, 1, buffer + i * ATAController::SECTOR_SIZE);
 	}
 
     for(uint i = 0; i < ATAController::SECTOR_SIZE * CLUSTER_SIZE; i += sizeof(FAT32Object))
 	{
-	    if(buffer[i] == 0 || buffer[i] == 0xE5)
+	    if(buffer[i] == 0 || buffer[i] == UNUSED_FAT_ENTRY)
 		{
 		    //Free entry
 
-		    FAT32Object& obj = *(FAT32Object*)(buffer +i);
+		    FAT32Object& obj = *(FAT32Object*)(buffer + i);
 		    obj.attributes = FAT32ObjectAttribte::FAT32OA_DIRECTORY;
 		    for(uint j = 0; j < 11; ++j)
 			obj.name[j] = ' ';
 		    utils::Copy(name, obj.name, nameLength);
-			obj.size =0;
-			obj.firstCluserL = freeCluster & 0xFFFF;
-			obj.firstClusterH = freeCluster & 0xFFFF0000;
-
+		    obj.size = 0;
+		    obj.firstCluserL = freeCluster & 0xFFFF;
+		    obj.firstClusterH = freeCluster & 0xFFFF0000;
 
 		    break;
 		}
 	}
-	
-	//return result;
-	//Write back the entire cluster
-	for(uint i = 0; i < CLUSTER_SIZE; ++i)
+
+    //return result;
+    //Write back the entire cluster
+    for(uint i = 0; i < CLUSTER_SIZE; ++i)
 	{
-		uint sector = parent.id + rootStartSector - clusterIdOffset + i;
+	    uint sector = parent.id + rootStartSector - clusterIdOffset + i;
 	    ataController->Write(sector, 1, buffer + i * ATAController::SECTOR_SIZE);
 	}
-	
-	//Write to the FAT table
-	uint fatOffset = (freeCluster  ) * 4;
-    uint fatSector = fatStartSector + (fatOffset / ATAController::SECTOR_SIZE);
-    uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE) / 4;
 
-    ataController->Read(fatSector, 1, buffer);
-
-
-	uint* tableValue = (uint*)(buffer);//
-	tableValue[ entryOffset] =  0x0FFFFFFF;
-	
-	ataController->Write(fatSector, 1, buffer );
+    //Write to the FAT table
+    SetFATClusterValue(freeCluster, USED_CLUSTER);
 
     //TODO if cluster is full, create new cluster for this dir
-	//TODO write to backup fat table
+    //TODO write to backup fat table
     delete[] buffer;
 
     return result;

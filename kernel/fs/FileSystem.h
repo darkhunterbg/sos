@@ -109,6 +109,10 @@ class FileSystem
 	 static const uint BOOT_RECORD_ADDRESS = 0x0 + 0x7c00;
 	 static const uint FAT_ENTRY_SIZE = 4;
 	 static const uint CLUSTER_SIZE = 8;
+	 
+	 static const uint USED_CLUSTER = 0x0FFFFFFF;
+	 static const uint FREE_CLUSTER = 0;
+	 static const byte UNUSED_FAT_ENTRY = 0xE5;
 	
 	private:
 	ATAController* ataController = nullptr;
@@ -121,7 +125,11 @@ class FileSystem
     FAT32ExtendedBootRecord extendedRecord;
 
 	FSID GetFATNextCluster(FSID cluster);
+	void SetFATClusterValue(FSID cluster, uint value);
 	FSID GetFreeCluster();
+	
+	uint GetSectorForCluster(FSID cluster);
+	FSID GetLastCluster(FSID cluster);
 	
 	public :
 	FileSystem();
