@@ -28,6 +28,40 @@ uint StringCopy(const char* s, char* d, uint size)
     return size;
 }
 
+uint StringUTFCopy(const char* utfs, char *d, uint size)
+{
+	for(uint i = 0; i < size; i+=2)
+	{
+		if(utfs[i] == 0 || utfs[i] == (char)0xFF)
+		return i/2 ;
+		
+	    d[i/2] = utfs[i];
+	
+	}
+
+    d[size/2] = 0;
+
+    return size/2;
+}
+
+uint StringCopyUTF(const char * s, char *utfd, uint size , uint utfSize)
+{
+	for(uint i=0;i< utfSize;++i)
+	{
+		utfd[i] = (char)0xFF;
+	}
+	for(uint i = 0; i < size; i++)
+	{
+		if(s[i]==0)
+			return i;
+		
+		utfd[i*2] = s[i];
+			
+	}
+	
+	return size;
+}
+
 uint StringAppend(const char* s, char* d, uint sSize, uint dSize)
 {
     for(uint i = 0; i < dSize; ++i)

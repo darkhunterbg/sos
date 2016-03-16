@@ -58,20 +58,21 @@ uint FileSystem::GetSectorForCluster(FSID cluster)
     return (cluster - clusterIdOffset) * CLUSTER_SIZE + rootStartSector;
 }
 
-FSID FileSystem::GetFreeCluster()
+FSID FileSystem::GetNextFreeCluster(FSID start)
 {
+    uint fatSector = fatStartSector + (start / ATAController::SECTOR_SIZE);
+    uint fatOffset = (start)*4;
+    uint entryOffset = (fatOffset % ATAController::SECTOR_SIZE) / 4;
+
     byte buffer[ATAController::SECTOR_SIZE];
 
-    uint sector = fatStartSector;
-
-    uint result = 0;
-    ;
+    uint result = entryOffset;
 
     for(uint i = 0; i < extendedRecord.sectorsPerFAT; ++i)
 	{
-	    ataController->Read(sector, 1, buffer);
+	    ataController->Read(fatSector, 1, buffer);
 	    uint* table = (uint*)(buffer);
-	    for(uint j = 0; j < ATAController::SECTOR_SIZE / 4; ++j)
+	    for(uint j = entryOffset; j < ATAController::SECTOR_SIZE / 4; ++j)
 		{
 		    uint cluster = table[j];
 		    if(cluster == 0)
@@ -80,7 +81,8 @@ FSID FileSystem::GetFreeCluster()
 		    ++result;
 		}
 
-	    sector += ATAController::SECTOR_SIZE;
+	    ++fatSector;
+	    entryOffset = 0;
 	}
 
     return -1;
@@ -195,36 +197,13 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 				{
 				    FAT32LongFileEntry& lfnObj = *reinterpret_cast<FAT32LongFileEntry*>(buffer + j);
 
-				    char tmp[13];
+				    char tmp[LFN_ENTRY_SIZE];
 
 				    int n = 0;
 
-				    for(int k = 0; k < 10; k += 2)
-					{
-					    if((byte)lfnObj.firstChar[k] == 0xFF)
-						break;
-
-					    tmp[n] = lfnObj.firstChar[k];
-					    ++n;
-					}
-				    for(int k = 0; k < 12; k += 2)
-					{
-					    if((byte)lfnObj.secondChar[k] == 0xFF)
-						break;
-
-					    tmp[n] = lfnObj.secondChar[k];
-					    ++n;
-					}
-				    for(int k = 0; k < 4; k += 2)
-					{
-					    if((byte)lfnObj.thirdChar[k] == 0xFF)
-						break;
-
-					    tmp[n] = lfnObj.thirdChar[k];
-					    ++n;
-					}
-
-				    tmp[n] = 0;
+				    n += utils::StringUTFCopy(lfnObj.firstChar, tmp + n, 10);
+				    n += utils::StringUTFCopy(lfnObj.secondChar, tmp + n, 12);
+				    n += utils::StringUTFCopy(lfnObj.thirdChar, tmp + n, 4);
 
 				    utils::Copy(tmp, lfn + lfnOffset - n, n);
 				    lfn[255] = 0;
@@ -305,62 +284,178 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
     return result;
 }
 
-FSEntry FileSystem::CreateDirectory(const char* name, uint nameLength, FSEntry parent)
+FSID FileSystem::StoreOnDisk(FSID parent, const FAT32Object& entry, FAT32LongFileEntry* lfnEntries, uint lfnCount)
 {
-    //find free cluster
-    FSID freeCluster = GetFreeCluster();
-    if(freeCluster < 0)
-	return FSEntry();
+    byte* buffer = new byte[ATAController::SECTOR_SIZE * CLUSTER_SIZE];
 
-    FSEntry result;
+    uint neededEntries = lfnCount + 1;
+    FSID cluster = parent;
+    uint clusterEntryOffset = 0;
+
+    FSID currentCluster = cluster;
+
+    bool found = false;
+
+    while(!found)
+	{
+	    uint sector = GetSectorForCluster(currentCluster);
+	    //Read directory entries
+	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+		{
+		    ataController->Read(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
+		}
+
+	    for(uint i = 0; i < ATAController::SECTOR_SIZE * CLUSTER_SIZE; i += sizeof(FAT32Object))
+		{
+		    if(buffer[i] == 0 || buffer[i] == UNUSED_FAT_ENTRY)
+			{
+			    if(neededEntries == lfnCount + 1)
+				clusterEntryOffset = i;
+
+			    //Free entry
+			    --neededEntries;
+			    if(neededEntries == 0)
+				{
+				    found = true;
+				    break;
+				}
+			}
+		    else
+			{
+			    //Nope, continue
+			    neededEntries = lfnCount + 1;
+
+			    cluster = currentCluster;
+			}
+		}
+
+	    if(!found)
+		{
+		    currentCluster = GetNextFreeCluster(currentCluster);
+		}
+	}
+
+    //Cluster is start
+    //clusterEntryOffset is offset in the cluster by bytes
+
+    neededEntries = lfnCount + 1;
+
+    uint sector = GetSectorForCluster(cluster);
+
+    while(neededEntries > 0)
+	{
+		SystemProvider::instance->GetVGATextSystem()->PrintNumber(neededEntries);
+		SystemProvider::instance->GetVGATextSystem()->PrintChar(' ');
+		
+	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+		{
+		    ataController->Read(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
+		}
+
+	    for(uint i = clusterEntryOffset; i < ATAController::SECTOR_SIZE * CLUSTER_SIZE; i += sizeof(FAT32Object))
+		{
+		    if(neededEntries == 1)
+			{
+			    FAT32Object* write = (FAT32Object*)(buffer + i);
+			    *write = entry;
+			}
+		    else
+			{
+			    FAT32LongFileEntry* write = (FAT32LongFileEntry*)(buffer + i);
+			    *write = lfnEntries[neededEntries - 2];
+			}
+
+		    --neededEntries;
+			
+			if(neededEntries == 0)
+				break;
+		}
+
+	    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+		{
+		     ataController->Write(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
+		}
+
+	    sector = GetSectorForCluster(currentCluster);
+	    clusterEntryOffset = 0;
+	}
+
+    if(cluster != currentCluster)
+	{
+	    SetFATClusterValue(cluster, currentCluster);
+	    SetFATClusterValue(currentCluster, USED_CLUSTER);
+	}
+
+    delete[] buffer;
+    return cluster;
+}
+
+CreateResult FileSystem::CreateDirectory(const char* name, uint nameLength, FSEntry parent, FSEntry& result)
+{
+    uint lfnEntries = nameLength / LFN_ENTRY_SIZE;
+    if(nameLength <= 11)
+	lfnEntries = 0;
+    else if(lfnEntries == 0)
+	++lfnEntries;
+
+    //find free cluster
+    FSID freeCluster = GetNextFreeCluster(parent.id);
+    if(freeCluster < 0)
+	return CreateResult::INVALID_PARENT;
+
+    SetFATClusterValue(freeCluster, USED_CLUSTER);
+
     result.id = freeCluster;
     result.isDirectory = true;
     result.size = 0;
     utils::StringCopy(name, result.name, 256);
 
-    byte* buffer = new byte[ATAController::SECTOR_SIZE * CLUSTER_SIZE];
+    //Create all entries;
 
-    //Read directory entries
-    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+    FAT32Object obj;
+
+    FAT32LongFileEntry lfnObj[20];
+
+    obj.attributes = FAT32ObjectAttribte::FAT32OA_DIRECTORY;
+
+    if(lfnEntries == 0)
 	{
-	    uint sector = GetSectorForCluster(parent.id) + i;
-	    ataController->Read(sector, 1, buffer + i * ATAController::SECTOR_SIZE);
+		utils::Copy(name, obj.name, 11);
+	    for(uint j = nameLength; j < 11; ++j)
+		obj.name[j] = ' ';
 	}
-
-    for(uint i = 0; i < ATAController::SECTOR_SIZE * CLUSTER_SIZE; i += sizeof(FAT32Object))
+    else
 	{
-	    if(buffer[i] == 0 || buffer[i] == UNUSED_FAT_ENTRY)
+	    for(uint j = 0; j < 11; ++j)
+		obj.name[j] = '~';
+
+	    uint n = 0;
+	    for(int i = lfnEntries - 1; i >= 0; --i)
 		{
-		    //Free entry
+		    FAT32LongFileEntry& e = lfnObj[i];
+		    e.attributes = FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY;
+		    e.order = i + 1;
+		    if(i == 0)
+			e.order |= 0b00100000;
+		    e._zero = 0;
+		    e.checksum = 0;
+		    e.type = 0;
 
-		    FAT32Object& obj = *(FAT32Object*)(buffer + i);
-		    obj.attributes = FAT32ObjectAttribte::FAT32OA_DIRECTORY;
-		    for(uint j = 0; j < 11; ++j)
-			obj.name[j] = ' ';
-		    utils::Copy(name, obj.name, nameLength);
-		    obj.size = 0;
-		    obj.firstCluserL = freeCluster & 0xFFFF;
-		    obj.firstClusterH = freeCluster & 0xFFFF0000;
-
-		    break;
+		    n += utils::StringCopyUTF(name + n, e.firstChar, nameLength - n, 10);
+		    n += utils::StringCopyUTF(name + n, e.secondChar, nameLength - n, 12);
+		    n += utils::StringCopyUTF(name + n, e.thirdChar, nameLength - n, 4);
 		}
 	}
+    obj.size = 0;
+    obj.firstCluserL = freeCluster & 0xFFFF;
+    obj.firstClusterH = freeCluster & 0xFFFF0000;
+	
+	SystemProvider::instance->GetVGATextSystem()->PrintNumber(freeCluster);
+	SystemProvider::instance->GetVGATextSystem()->NewLine();
+    StoreOnDisk(parent.id, obj, lfnObj, lfnEntries);
 
-    //return result;
-    //Write back the entire cluster
-    for(uint i = 0; i < CLUSTER_SIZE; ++i)
-	{
-	    uint sector = parent.id + rootStartSector - clusterIdOffset + i;
-	    ataController->Write(sector, 1, buffer + i * ATAController::SECTOR_SIZE);
-	}
+    //=================================================
 
-    //Write to the FAT table
-    SetFATClusterValue(freeCluster, USED_CLUSTER);
-
-    //TODO if cluster is full, create new cluster for this dir
-    //TODO write to backup fat table
-    delete[] buffer;
-
-    return result;
+    return CreateResult::CS_SUCCESS;
 }
 }

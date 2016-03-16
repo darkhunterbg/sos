@@ -101,6 +101,15 @@ struct FSEntry
 	}
 };
 
+enum class CreateResult
+{
+	CS_SUCCESS,
+	ALREADY_EXISTS,
+	NO_FREE_SPACE,
+	INVALID_NAME,
+	INVALID_PARENT,
+};
+
 class FileSystem
 {
     FileSystem(const& FileSystem) = delete;
@@ -113,6 +122,7 @@ class FileSystem
 	 static const uint USED_CLUSTER = 0x0FFFFFFF;
 	 static const uint FREE_CLUSTER = 0;
 	 static const byte UNUSED_FAT_ENTRY = 0xE5;
+	static const uint LFN_ENTRY_SIZE = 13;
 	
 	private:
 	ATAController* ataController = nullptr;
@@ -126,10 +136,13 @@ class FileSystem
 
 	FSID GetFATNextCluster(FSID cluster);
 	void SetFATClusterValue(FSID cluster, uint value);
-	FSID GetFreeCluster();
+	FSID GetNextFreeCluster(FSID start);
+
 	
 	uint GetSectorForCluster(FSID cluster);
 	FSID GetLastCluster(FSID cluster);
+	
+	FSID StoreOnDisk(FSID parent,const FAT32Object& entry, FAT32LongFileEntry* lfnEntries, uint lfnCount);
 	
 	public :
 	FileSystem();
@@ -137,7 +150,7 @@ class FileSystem
 	
 	uint GetEntries(FSEntry dir, FSEntry* buffer, uint bufferSize);
 	FSEntry GetRoot();
-	FSEntry CreateDirectory(const char* name,uint nameLength, FSEntry parent);
+	CreateResult CreateDirectory(const char* name,uint nameLength, FSEntry parent, FSEntry& outEntry);
 	
 	ATAController& GetATAController();
 };
