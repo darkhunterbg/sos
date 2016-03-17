@@ -87,7 +87,10 @@ struct FSEntry
 {
 	 char*  name;
 	FSID id;
+	FSID parentID;
+	uint parentOffset;
 	uint size;
+	uint lfnEntries;
 	bool isDirectory;
 	
 	FSEntry()
@@ -156,5 +159,7 @@ class FileSystem
 	CreateResult CreateFile(const char* name, FSEntry parent, FSEntry& outEntry);
 	
 	ATAController& GetATAController();
+	
+	bool Delete(FSEntry entry);
 };
 }

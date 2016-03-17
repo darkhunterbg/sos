@@ -39,19 +39,21 @@ void kmain()
 
     systemProvider->GetCPUSystem()->EnableInterrupts();
 
-
     FSEntry buffer[32];
-	
-	FSEntry root = systemProvider->GetFileSystem()->GetRoot();
-	
-	FSEntry dir ;
-	 systemProvider->GetFileSystem()->CreateFile("Test123LongName.txt",root, dir);
-	
-	
+
+    FSEntry root = systemProvider->GetFileSystem()->GetRoot();
+
+    FSEntry dir;
+    // systemProvider->GetFileSystem()->CreateFile("Test123LongName.txt",root, dir);
+
     uint size = systemProvider->GetFileSystem()->GetEntries(root, buffer, 32);
 
     systemProvider->GetVGATextSystem()->PrintNumber(size);
     systemProvider->GetVGATextSystem()->PrintChar('\n');
+
+	//systemProvider->GetFileSystem()->Delete(buffer[3]);
+
+  size = systemProvider->GetFileSystem()->GetEntries(root, buffer, 32);
 
     for(uint i = 0; i < size; ++i)
 	{
@@ -59,9 +61,18 @@ void kmain()
 	    systemProvider->GetVGATextSystem()->PrintText(" ID:");
 	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].id);
 	    systemProvider->GetVGATextSystem()->PrintText(" Size:");
-		systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].size);
+	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].size);
+	    systemProvider->GetVGATextSystem()->PrintText(" Cluster:");
+	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].id);
+	    systemProvider->GetVGATextSystem()->PrintText(" Parent:");
+	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].parentID);
+	    systemProvider->GetVGATextSystem()->PrintText(" LFNEtries:");
+	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].lfnEntries);
+	    systemProvider->GetVGATextSystem()->PrintText(" ParentOffset:");
+	    systemProvider->GetVGATextSystem()->PrintNumber(buffer[i].parentOffset);
 	    systemProvider->GetVGATextSystem()->NewLine();
 	}
+	
     systemProvider->GetCPUSystem()->Halt();
     //TextInput();
     //DrawGUI();

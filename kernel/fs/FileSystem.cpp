@@ -142,6 +142,9 @@ FSEntry FileSystem::GetRoot()
     utils::StringCopy("/", result.name, 2);
     result.isDirectory = true;
     result.size = 0;
+    result.parentID = 0;
+    result.parentOffset = 0;
+    result.lfnEntries = 0;
 
     return result;
 }
@@ -164,6 +167,8 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
     bool done = false;
 
     FSID cluster = dir.id;
+
+    uint lfnEntries = 0;
 
     while(!done)
 	{
@@ -195,6 +200,7 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 				}
 			    if(buffer[j + 11] == (byte)FAT32ObjectAttribte::FAT32OA_LONG_FILE_ENTRY)
 				{
+				    ++lfnEntries;
 				    FAT32LongFileEntry& lfnObj = *reinterpret_cast<FAT32LongFileEntry*>(buffer + j);
 
 				    char tmp[LFN_ENTRY_SIZE];
@@ -234,10 +240,14 @@ uint FileSystem::GetEntries(FSEntry dir, FSEntry* entries, uint maxEntries)
 
 			    FSEntry entry;
 
+			    entry.parentID = dir.id;
+			    entry.parentOffset = (i * ATAController::SECTOR_SIZE + j) / sizeof(FAT32Object);
 			    entry.id = (((int)obj.firstClusterH) << 16) + obj.firstCluserL;
 			    entry.isDirectory = (byte)obj.attributes & (byte)FAT32ObjectAttribte::FAT32OA_DIRECTORY;
 			    entry.size = obj.size;
+			    entry.lfnEntries = lfnEntries;
 
+			    lfnEntries = 0;
 			    //SystemProvider::instance->GetVGATextSystem()->PrintText(lfn);
 			    //SystemProvider::instance->GetVGATextSystem()->NewLine();
 
@@ -342,6 +352,8 @@ FSID FileSystem::StoreOnDisk(FSID parent, const FAT32Object& entry, FAT32LongFil
 
     uint sector = GetSectorForCluster(cluster);
 
+    uint offsetFromEntry = clusterEntryOffset + lfnCount;
+
     while(neededEntries > 0)
 	{
 	    SystemProvider::instance->GetVGATextSystem()->PrintNumber(neededEntries);
@@ -387,7 +399,7 @@ FSID FileSystem::StoreOnDisk(FSID parent, const FAT32Object& entry, FAT32LongFil
 	}
 
     delete[] buffer;
-    return cluster;
+    return offsetFromEntry;
 }
 
 CreateResult FileSystem::CreateEntry(const char* name, uint nameLength, FSEntry parent, bool isDir, FSEntry& result)
@@ -415,6 +427,7 @@ CreateResult FileSystem::CreateEntry(const char* name, uint nameLength, FSEntry 
 
     result.isDirectory = isDir;
     result.size = 0;
+    result.parentID = parent.id;
     utils::StringCopy(name, result.name, 256);
 
     //Create all entries;
@@ -476,10 +489,12 @@ CreateResult FileSystem::CreateEntry(const char* name, uint nameLength, FSEntry 
 		}
 	}
     obj.size = 0;
-    obj.firstCluserL = result.id  & 0xFFFF;
-    obj.firstClusterH = result.id  & 0xFFFF0000;
+    obj.firstCluserL = result.id & 0xFFFF;
+    obj.firstClusterH = result.id & 0xFFFF0000;
 
-    StoreOnDisk(parent.id, obj, lfnObj, lfnEntries);
+    result.lfnEntries = lfnEntries;
+
+    result.parentOffset = StoreOnDisk(parent.id, obj, lfnObj, lfnEntries);
 
     return CreateResult::CS_SUCCESS;
 }
@@ -492,5 +507,63 @@ CreateResult FileSystem::CreateDirectory(const char* name, FSEntry parent, FSEnt
 CreateResult FileSystem::CreateFile(const char* name, FSEntry parent, FSEntry& result)
 {
     return CreateEntry(name, utils::StringLength(name), parent, false, result);
+}
+
+bool FileSystem::Delete(FSEntry entry)
+{
+    if(entry.id == GetRoot().id)
+	return false;
+
+    byte* buffer = new byte[ATAController::SECTOR_SIZE * CLUSTER_SIZE];
+
+    if(entry.isDirectory)
+	{
+	    //Delete all entries in the dir
+	    FSEntry entries[ 32];
+		uint count = GetEntries(entry,entries,32);
+		for(uint i=0;i<count;++i)
+		{
+			Delete(entries[i]);
+		}
+	}
+	
+
+
+    //Free from FAT
+    if(entry.id != 0)
+	{
+	    FSID cluster = entry.id;
+	    while(cluster <= USED_CLUSTER)
+		{
+		    FSID remove = cluster;
+		  //  SetFATClusterValue(remove, FREE_CLUSTER);
+		    cluster = GetFATNextCluster(cluster);
+		}
+	}
+
+
+    //Delete the entry
+    uint sector = GetSectorForCluster(entry.parentID);
+
+    //TODO - offset in chained clusters
+
+    //Read cluster where entry exist mark it as unused
+    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+	{
+	    ataController->Read(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
+	}
+
+    FAT32Object* objects = (FAT32Object*)buffer;
+
+    for(uint i = 0; i < entry.lfnEntries + 1; ++i)
+	objects[entry.parentOffset - i].name[0] = UNUSED_FAT_ENTRY;
+
+    for(uint i = 0; i < CLUSTER_SIZE; ++i)
+	{
+	    ataController->Write(sector + i, 1, buffer + i * ATAController::SECTOR_SIZE);
+	}
+
+    delete[] buffer;
+    return true;
 }
 }
